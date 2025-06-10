@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block content %}
+<div class="text-center mt-20">
+  <h1 class="text-4xl font-bold text-gray-800">Welcome to FinDash</h1>
+  <p class="mt-4 text-gray-600">
+    Track all your financial accounts in one place.
+  </p>
+  <div class="mt-6">
+    <a
+      href="{% url 'register' %}"
+      class="bg-blue-600 text-white px-4 py-2 rounded mr-2 hover:bg-blue-700"
+      >Get Started</a
+    >
+    <a href="{% url 'login' %}" class="text-blue-600 underline"
+      >Already have an account? Log in</a
+    >
+  </div>
+</div>
+{% endblock %}
