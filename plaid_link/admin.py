@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import PlaidItem
 
-# Register your models here.
+@admin.register(PlaidItem)
+class PlaidItemAdmin(admin.ModelAdmin):
+    list_display = ("user", "institution_name", "item_id", "created_at")
