@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+  <h1 class="text-2xl font-semibold mb-4">Welcome, {{ user.email }}</h1>
+
+  <!-- Link Bank Account -->
+  <button id="link-button" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
+    Link Your Bank
+  </button>
+
+  <!-- Load Plaid Link SDK -->
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+
+  <script>
+    document.getElementById('link-button').addEventListener('click', async function () {
+      // Step 1: Request a link_token from your backend
+      const linkRes = await fetch("/plaid/create-link-token/");
+      const { link_token } = await linkRes.json();
+
+      // Step 2: Initialize Plaid Link
+      const handler = Plaid.create({
+        token: link_token,
+        onSuccess: async function (public_token, metadata) {
+          // Step 3: Send public_token to backend to exchange for access_token
+          const response = await fetch("/plaid/exchange-token/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ public_token })
+          });
+
+          const result = await response.json();
+          if (result.status === "success") {
+            alert("Bank account linked successfully!");
+          } else {
+            alert("Something went wrong: " + result.error);
+          }
+        },
+        onExit: function (err, metadata) {
+          if (err) console.error("Plaid Link exited with error", err);
+        }
+      });
+
+      handler.open();
+    });
+  </script>
+{% endblock %}
