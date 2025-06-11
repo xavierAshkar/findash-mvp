@@ -59,7 +59,6 @@ from .utils import encrypt_token
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 
 
-@csrf_exempt  # TEMP: replace with real CSRF protection later
 @require_POST
 @login_required
 def exchange_public_token(request):
@@ -101,3 +100,58 @@ def exchange_public_token(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+
+
+
+from plaid.model.accounts_get_request import AccountsGetRequest
+from .models import PlaidItem, Account
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+
+
+@require_POST
+@login_required
+def fetch_accounts(request):
+    try:
+        # 1. Get the user's PlaidItem
+        plaid_item = PlaidItem.objects.get(user=request.user)
+
+        # 2. Decrypt the access_token
+        access_token = plaid_item.get_access_token()
+
+        # 3. Setup Plaid client
+        configuration = Configuration(
+            host="https://sandbox.plaid.com",
+            api_key={
+                "clientId": config("PLAID_CLIENT_ID"),
+                "secret": config("PLAID_SECRET"),
+            }
+        )
+        client = plaid_api.PlaidApi(ApiClient(configuration))
+
+        # 4. Call /accounts/get
+        request_data = AccountsGetRequest(access_token=access_token)
+        response = client.accounts_get(request_data)
+        accounts = response.to_dict()["accounts"]
+
+        # 5. Save accounts in the DB
+        for acct in accounts:
+            Account.objects.update_or_create(
+                plaid_item=plaid_item,
+                account_id=acct["account_id"],
+                defaults={
+                    "name": acct["name"],
+                    "official_name": acct.get("official_name"),
+                    "type": acct["type"],
+                    "subtype": acct["subtype"],
+                    "available_balance": acct["balances"].get("available"),
+                    "current_balance": acct["balances"].get("current"),
+                }
+            )
+
+        return JsonResponse({"status": "success", "count": len(accounts)})
+
+    except PlaidItem.DoesNotExist:
+        return JsonResponse({"error": "Plaid item not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
