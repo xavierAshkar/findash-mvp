@@ -23,4 +23,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),  # login/logout views
     path('users/', include('users.urls')),  # register route
     path('', user_views.home, name='home'),
+    path('plaid/', include('plaid_link.urls')),
 ]
