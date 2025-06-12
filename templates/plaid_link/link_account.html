@@ -35,7 +35,7 @@
           if (result.status === 'success') {
             document.getElementById('message').textContent = 'Account linked successfully!';
             // Redirect to dashboard after successful link
-            window.location.href = '/dashboard/';  // Adjust to your dashboard URL
+            window.location.href = '/users/dashboard/';
           } else {
             document.getElementById('message').textContent = 'Error linking account: ' + result.error;
           }

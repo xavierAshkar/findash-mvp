@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',  # Custom app for user management
     'plaid_link', # Custom app for Plaid integration
+    'django_extensions',
     'rest_framework',  # Django REST Framework for API development
     'corsheaders',  # CORS headers for API (If using react or other frontends)
 ]

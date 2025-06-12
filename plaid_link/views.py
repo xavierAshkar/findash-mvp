@@ -167,7 +167,7 @@ def link_account(request):
 
     if has_plaid_item:
         # User already linked an account — redirect to dashboard
-        return redirect('dashboard')  # make sure this route name matches your dashboard view
+        return redirect('users:dashboard')
 
     # Otherwise, render the linking page
     return render(request, 'plaid_link/link_account.html')

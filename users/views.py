@@ -15,7 +15,7 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)  # Auto-login after signup
-            return redirect('dashboard')  # You can change this later
+            return redirect('users:dashboard')
     else:
         form = CustomUserCreationForm()
     return render(request, "registration/register.html", {"form": form})
