@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
+from plaid_link.models import PlaidItem
 
 
 def home(request):
@@ -21,4 +22,10 @@ def register(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'dashboard.html', {'user': request.user})
+    has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
+    if not has_plaid_item:
+        # No accounts linked — redirect to link account page
+        return redirect('plaid:link_account')  # make sure 'plaid' is your app namespace if you have one
+    
+    # If accounts exist, render dashboard page
+    return render(request, 'users/dashboard.html')

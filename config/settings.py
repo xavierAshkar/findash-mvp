@@ -132,4 +132,4 @@ AUTH_USER_MODEL = 'users.CustomUser'
 TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates')]
 
 # Redirect logged-in users to dashboard instead of /accounts/profile/
-LOGIN_REDIRECT_URL = '/users/dashboard/'
+LOGIN_REDIRECT_URL = '/plaid/link-account/'
