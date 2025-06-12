@@ -20,8 +20,16 @@ from users import views as user_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),  # login/logout views
-    path('users/', include('users.urls')),  # register route
-    path('', user_views.home, name='home'),
+
+    # Django built-in auth views for login/logout under /users/
+    path('users/', include('django.contrib.auth.urls')),
+
+    # Your users app URLs (register, dashboard, home, etc.) under /users/
+    path('users/', include('users.urls')),
+
+    # Plaid app URLs under /plaid/
     path('plaid/', include('plaid_link.urls')),
+
+    # Root home page
+    path('', user_views.home, name='home'),
 ]
