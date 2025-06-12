@@ -155,3 +155,19 @@ def fetch_accounts(request):
         return JsonResponse({"error": "Plaid item not found."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import PlaidItem
+
+@login_required
+def link_account(request):
+    # Check if user already has linked accounts
+    has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
+
+    if has_plaid_item:
+        # User already linked an account — redirect to dashboard
+        return redirect('dashboard')  # make sure this route name matches your dashboard view
+
+    # Otherwise, render the linking page
+    return render(request, 'plaid_link/link_account.html')
