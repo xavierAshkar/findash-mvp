@@ -3,48 +3,36 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-  <h1 class="text-2xl font-semibold mb-4">Welcome, {{ user.email }}</h1>
+<h1 class="text-3xl font-bold mb-6">Your Accounts</h1>
 
-  <!-- Link Bank Account -->
-  <button id="link-button" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
-    Link Your Bank
-  </button>
+{% if accounts %}
+  <div class="space-y-8">
 
-  <!-- Load Plaid Link SDK -->
-  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    {% for acct_type in account_types %}
+    <div>
+      <h2 class="text-2xl font-semibold capitalize mb-2">{{ acct_type }} Accounts</h2>
+      <ul class="list-disc list-inside">
+        {% for account in accounts %}
+          {% if account.type == acct_type %}
+            <li>
+              <strong>{{ account.name }}</strong>
+              {% if account.official_name %} ({{ account.official_name }}){% endif %}
+              <br>
+              Available Balance: ${{ account.available_balance|default:"N/A" }}
+              <br>
+              Current Balance: ${{ account.current_balance|default:"N/A" }}
+            </li>
+          {% endif %}
+        {% empty %}
+          <li>No {{ acct_type }} accounts linked.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
 
-  <script>
-    document.getElementById('link-button').addEventListener('click', async function () {
-      // Step 1: Request a link_token from your backend
-      const linkRes = await fetch("/plaid/create-link-token/");
-      const { link_token } = await linkRes.json();
 
-      // Step 2: Initialize Plaid Link
-      const handler = Plaid.create({
-        token: link_token,
-        onSuccess: async function (public_token, metadata) {
-          // Step 3: Send public_token to backend to exchange for access_token
-          const response = await fetch("/plaid/exchange-token/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ public_token })
-          });
-
-          const result = await response.json();
-          if (result.status === "success") {
-            alert("Bank account linked successfully!");
-          } else {
-            alert("Something went wrong: " + result.error);
-          }
-        },
-        onExit: function (err, metadata) {
-          if (err) console.error("Plaid Link exited with error", err);
-        }
-      });
-
-      handler.open();
-    });
-  </script>
+  </div>
+{% else %}
+  <p>You have no accounts linked. <a href="{% url 'plaid:link_account' %}">Link your bank account now</a>.</p>
+{% endif %}
 {% endblock %}

@@ -33,9 +33,23 @@
           const result = await exchangeRes.json();
 
           if (result.status === 'success') {
-            document.getElementById('message').textContent = 'Account linked successfully!';
-            // Redirect to dashboard after successful link
-            window.location.href = '/users/dashboard/';
+            // Now fetch and store accounts from Plaid API
+            const fetchRes = await fetch('/plaid/fetch-accounts/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+              },
+            });
+            const fetchResult = await fetchRes.json();
+
+            if (fetchResult.status === 'success') {
+              document.getElementById('message').textContent = 'Account linked and data fetched successfully!';
+              // Redirect to dashboard after storing accounts
+              window.location.href = '/users/dashboard/';
+            } else {
+              document.getElementById('message').textContent = 'Account linked but failed to fetch accounts: ' + fetchResult.error;
+            }
           } else {
             document.getElementById('message').textContent = 'Error linking account: ' + result.error;
           }
