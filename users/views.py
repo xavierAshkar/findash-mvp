@@ -1,36 +1,47 @@
-# Create your views here.
+"""
+users/views.py
+
+Handles public-facing views such as:
+- Home page
+- User registration
+"""
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
-from plaid_link.models import PlaidItem, Account
-
 
 def home(request):
+    """
+    Render the homepage (accessible to all users).
+    """
     return render(request, 'home.html')
 
+
 def register(request):
+    """
+    Handle user registration.
+    
+    - On GET: display a blank registration form
+    - On POST: validate and save the user, log them in,
+      and redirect to the dashboard if successful
+    """
     if request.method == "POST":
+        # Create a form instance with submitted POST data
         form = CustomUserCreationForm(request.POST)
+
+        # Validate the form (built-in Django validation + custom logic)
         if form.is_valid():
+            # Save the new user to the database
             user = form.save()
-            login(request, user)  # Auto-login after signup
-            return redirect('users:dashboard')
+
+            # Log the user in after successful registration
+            login(request, user)
+
+            # Redirect user to their dashboard
+            return redirect('core:dashboard')
     else:
+        # If GET request, instantiate a blank registration form
         form = CustomUserCreationForm()
+
+    # Render the registration template with the form (either blank or with errors)
     return render(request, "registration/register.html", {"form": form})
-
-@login_required
-def dashboard(request):
-    has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
-    if not has_plaid_item:
-        return redirect('plaid:link_account')
-
-    accounts = Account.objects.filter(plaid_item__user=request.user)
-
-    account_types = ["depository", "credit"]
-
-    return render(request, 'users/dashboard.html', {
-        'accounts': accounts,
-        'account_types': account_types,
-    })

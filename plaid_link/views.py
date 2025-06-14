@@ -1,5 +1,20 @@
-from django.http import JsonResponse
+"""
+plaid_link/views.py
+
+Handles all Plaid-related API calls and views:
+- Create link tokens
+- Exchange public tokens for access tokens
+- Fetch and store account data
+- Render account linking page
+"""
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from decouple import config
+import json
 
 from plaid.configuration import Configuration
 from plaid.api_client import ApiClient
@@ -7,12 +22,26 @@ from plaid.api import plaid_api
 
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 
+from .models import PlaidItem, Account
+from .utils import encrypt_token
 
+
+
+# --------------------------
+# Create Plaid Link Token
+# --------------------------
+
+@login_required
 def create_link_token(request):
-    # Configure Plaid client using sandbox credentials from .env
+    """
+    Generates a link_token for initializing the Plaid Link flow.
+    """
+    # Setup Plaid client with sandbox credentials
     configuration = Configuration(
         host="https://sandbox.plaid.com",
         api_key={
@@ -20,10 +49,9 @@ def create_link_token(request):
             "secret": config("PLAID_SECRET"),
         }
     )
-    api_client = ApiClient(configuration)
-    client = plaid_api.PlaidApi(api_client)
+    client = plaid_api.PlaidApi(ApiClient(configuration))
 
-    # Build request payload with user ID and required Plaid products
+    # Build request payload with current user ID
     user = LinkTokenCreateRequestUser(client_user_id=str(request.user.id))
     request_data = LinkTokenCreateRequest(
         user=user,
@@ -34,37 +62,27 @@ def create_link_token(request):
             Products("investments"),
             Products("liabilities"),
         ],
-
         country_codes=[CountryCode("US")],
         language='en',
     )
 
-    # Send request to Plaid and return the link_token
+    # Request Plaid to create a new link token
     response = client.link_token_create(request_data)
     return JsonResponse(response.to_dict())
 
-# -------------------------
-# Exchange Public Token View
-# -------------------------
 
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseBadRequest
-import json
 
-from .models import PlaidItem
-from .utils import encrypt_token
-
-from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
-
+# ----------------------------------
+# Exchange Public Token for Access
+# ----------------------------------
 
 @require_POST
 @login_required
 def exchange_public_token(request):
     """
-    Receives a public_token, exchanges it for an access_token,
-    encrypts it, and stores it linked to the current user.
+    Receives a public_token from the frontend,
+    exchanges it for a secure access_token,
+    encrypts it, and stores it in the database.
     """
     try:
         body = json.loads(request.body)
@@ -73,6 +91,7 @@ def exchange_public_token(request):
         if not public_token:
             return HttpResponseBadRequest("Missing public_token")
 
+        # Setup Plaid client
         configuration = Configuration(
             host="https://sandbox.plaid.com",
             api_key={
@@ -82,12 +101,14 @@ def exchange_public_token(request):
         )
         client = plaid_api.PlaidApi(ApiClient(configuration))
 
+        # Exchange public_token for access_token
         exchange_request = ItemPublicTokenExchangeRequest(public_token=public_token)
         exchange_response = client.item_public_token_exchange(exchange_request)
 
         access_token = exchange_response["access_token"]
         item_id = exchange_response["item_id"]
 
+        # Store the encrypted access_token in the database
         plaid_item = PlaidItem(
             user=request.user,
             item_id=item_id,
@@ -103,23 +124,23 @@ def exchange_public_token(request):
 
 
 
-from plaid.model.accounts_get_request import AccountsGetRequest
-from .models import PlaidItem, Account
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-
+# -----------------------------
+# Fetch and Save Accounts
+# -----------------------------
 
 @require_POST
 @login_required
 def fetch_accounts(request):
+    """
+    Fetches the user's financial accounts from Plaid
+    and stores/updates them in the database.
+    """
     try:
-        # 1. Get the user's PlaidItem
+        # Get user's PlaidItem
         plaid_item = PlaidItem.objects.get(user=request.user)
-
-        # 2. Decrypt the access_token
         access_token = plaid_item.get_access_token()
 
-        # 3. Setup Plaid client
+        # Setup Plaid client
         configuration = Configuration(
             host="https://sandbox.plaid.com",
             api_key={
@@ -129,12 +150,12 @@ def fetch_accounts(request):
         )
         client = plaid_api.PlaidApi(ApiClient(configuration))
 
-        # 4. Call /accounts/get
+        # Call /accounts/get endpoint
         request_data = AccountsGetRequest(access_token=access_token)
         response = client.accounts_get(request_data)
         accounts = response.to_dict()["accounts"]
 
-        # 5. Save accounts in the DB
+        # Save or update accounts in DB
         for acct in accounts:
             Account.objects.update_or_create(
                 plaid_item=plaid_item,
@@ -156,18 +177,23 @@ def fetch_accounts(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .models import PlaidItem
+
+
+# -----------------------------
+# Render Link Page
+# -----------------------------
 
 @login_required
 def link_account(request):
-    # Check if user already has linked accounts
+    """
+    Renders the Plaid account linking page,
+    or redirects to the dashboard if accounts are already linked.
+    """
     has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
 
     if has_plaid_item:
         # User already linked an account — redirect to dashboard
-        return redirect('users:dashboard')
+        return redirect('core:dashboard')
 
-    # Otherwise, render the linking page
+    # Show account linking interface
     return render(request, 'plaid_link/link_account.html')

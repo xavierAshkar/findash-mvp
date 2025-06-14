@@ -1,48 +1,50 @@
-{% extends 'base.html' %}
+{% extends 'base_public.html' %}
 {% load form_tags %}
+
 {% block content %}
+<!-- Centered login card layout -->
 <div class="min-h-screen flex items-center justify-center px-4">
   <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+
+    <!-- Header with close (home) link -->
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold text-gray-800">Login</h2>
-      <a
-        href="{% url 'home' %}"
-        class="text-gray-400 hover:text-gray-600 text-xl"
-        >&times;</a
-      >
+      <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600 text-xl">&times;</a>
     </div>
 
+    <!-- Login Form -->
     <form method="post" class="space-y-4">
       {% csrf_token %}
+
+      <!-- Username (email) field -->
       <div>
-        <label for="id_username" class="block text-sm font-medium text-gray-700"
-          >Email</label
-        >
+        <label for="id_username" class="block text-sm font-medium text-gray-700">Email</label>
         {{ form.username|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
       </div>
+
+      <!-- Password field -->
       <div>
-        <label for="id_password" class="block text-sm font-medium text-gray-700"
-          >Password</label
-        >
+        <label for="id_password" class="block text-sm font-medium text-gray-700">Password</label>
         {{ form.password|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
       </div>
+
+      <!-- Forgot Password (for future feature) -->
       <div class="text-right text-sm">
         <a href="#" class="text-blue-500 hover:underline">Forgot password?</a>
       </div>
-      <button
-        type="submit"
-        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-      >
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
         Login
       </button>
     </form>
 
+    <!-- Link to Register -->
     <p class="mt-4 text-sm text-center text-gray-600">
       Don’t have an account?
-      <a href="{% url 'users:register' %}" class="text-blue-500 hover:underline"
-        >Sign up</a
-      >
+      <a href="{% url 'users:register' %}" class="text-blue-500 hover:underline">Sign up</a>
     </p>
+
   </div>
 </div>
 {% endblock %}
