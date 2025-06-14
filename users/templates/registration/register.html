@@ -1,64 +1,55 @@
-{% extends 'base.html' %}
+{% extends 'base_public.html' %}
 {% load form_tags %}
+
 {% block content %}
+<!-- Centered registration card -->
 <div class="min-h-screen flex items-center justify-center px-4">
   <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+
+    <!-- Header with dismiss link -->
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold text-gray-800">Sign Up</h2>
-      <a
-        href="{% url 'home' %}"
-        class="text-gray-400 hover:text-gray-600 text-xl"
-        >&times;</a
-      >
+      <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600 text-xl">&times;</a>
     </div>
 
+    <!-- Registration Form -->
     <form method="post" class="space-y-4">
       {% csrf_token %}
-      <div>
-        <label for="id_email" class="block text-sm font-medium text-gray-700"
-          >Email</label
-        >
-        {{ form.email|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
 
-      </div>
+      <!-- Email Field -->
       <div>
-        <label
-          for="id_full_name"
-          class="block text-sm font-medium text-gray-700"
-          >Full Name</label
-        >
+        <label for="id_email" class="block text-sm font-medium text-gray-700">Email</label>
+        {{ form.email|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
+      </div>
+
+      <!-- Full Name Field -->
+      <div>
+        <label for="id_full_name" class="block text-sm font-medium text-gray-700">Full Name</label>
         {{ form.full_name|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
       </div>
+
+      <!-- Password Fields -->
       <div>
-        <label
-          for="id_password1"
-          class="block text-sm font-medium text-gray-700"
-          >Password</label
-        >
+        <label for="id_password1" class="block text-sm font-medium text-gray-700">Password</label>
         {{ form.password1|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
       </div>
       <div>
-        <label
-          for="id_password2"
-          class="block text-sm font-medium text-gray-700"
-          >Confirm Password</label
-        >
+        <label for="id_password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
         {{ form.password2|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
       </div>
-      <button
-        type="submit"
-        class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-      >
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
         Sign Up
       </button>
     </form>
 
+    <!-- Link to Login -->
     <p class="mt-4 text-sm text-center text-gray-600">
       Already have an account?
-      <a href="{% url 'users:login' %}" class="text-blue-500 hover:underline"
-        >Login</a
-      >
+      <a href="{% url 'users:login' %}" class="text-blue-500 hover:underline">Login</a>
     </p>
+
   </div>
 </div>
 {% endblock %}
