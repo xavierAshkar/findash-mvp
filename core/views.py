@@ -7,7 +7,7 @@ Handles views for the main app experience after login:
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from plaid_link.models import PlaidItem, Account
+from plaid_link.models import PlaidItem, Account, Transaction
 
 
 @login_required
@@ -36,3 +36,18 @@ def dashboard(request):
         'accounts': accounts,
         'account_types': account_types,
     })
+
+@login_required
+def cash_accounts(request):
+    accounts = Account.objects.filter(plaid_item__user=request.user, type__in=["checking", "savings"])
+    return render(request, "core/cash_accounts.html", {"accounts": accounts})
+
+@login_required
+def credit_accounts(request):
+    accounts = Account.objects.filter(plaid_item__user=request.user, type="credit")
+    return render(request, "core/credit_accounts.html", {"accounts": accounts})
+
+@login_required
+def transactions(request):
+    transactions = Transaction.objects.filter(account__plaid_item__user=request.user).order_by("-date")[:50]
+    return render(request, "core/transactions.html", {"transactions": transactions})

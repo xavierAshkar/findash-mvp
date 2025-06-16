@@ -1,13 +1,49 @@
-<!-- templates/base_app.html -->
+<!-- core/templates/base_app.html -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}FinDash{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-  </head>
-  <body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto px-4">{% block content %}{% endblock %}</div>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Findash{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-56 bg-gray-800 p-4 space-y-4">
+      <nav class="flex flex-col gap-4">
+        <a href="{% url 'core:dashboard' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/dashboard/' %}bg-gray-700{% endif %}">
+          🏠 Dashboard
+        </a>
+        <a href="{% url 'core:cash_accounts' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/cash/' %}bg-gray-700{% endif %}">
+          💵 Cash Accounts
+        </a>
+        <a href="{% url 'core:credit_accounts' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/credit/' %}bg-gray-700{% endif %}">
+          💳 Credit Cards
+        </a>
+        <a href="{% url 'core:transactions' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/transactions/' %}bg-gray-700{% endif %}">
+          🔁 Transactions
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Header -->
+      <header class="bg-gray-700 h-16 flex items-center px-6 shadow">
+        <h1 class="text-xl font-semibold">Welcome back, {{ request.user.first_name|default:request.user.email }}</h1>
+      </header>
+
+      <!-- Body Content -->
+      <main class="flex-1 grid grid-cols-2 gap-6 p-6 overflow-y-auto">
+        {% block content %}
+        <!-- Left + Right Columns -->
+        <div class="bg-gray-800 rounded-lg p-4 h-[calc(100vh-8rem)]">Left Column</div>
+        <div class="bg-gray-800 rounded-lg p-4 h-[calc(100vh-8rem)]">Right Column</div>
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+
+</body>
 </html>

@@ -32,3 +32,17 @@ class Account(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.subtype})"
+    
+class Transaction(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    transaction_id = models.CharField(max_length=100, unique=True)  # from Plaid
+    name = models.CharField(max_length=200)
+    amount = models.FloatField()
+    date = models.DateField()
+    category = models.CharField(max_length=100, null=True, blank=True)
+    merchant_name = models.CharField(max_length=200, null=True, blank=True)
+    payment_channel = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.date} – {self.name} – ${self.amount}"
