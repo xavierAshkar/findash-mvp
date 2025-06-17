@@ -54,7 +54,8 @@ def credit_accounts(request):
 
 @login_required
 def transactions(request):
-    transactions = Transaction.objects.filter(account__plaid_item__user=request.user).order_by("-date")[:50]
+    transactions = Transaction.objects.filter(
+        account__plaid_item__user=request.user).order_by("-date")[:50]
     return render(request, "core/transactions.html", {"transactions": transactions})
 
 @login_required
