@@ -23,6 +23,10 @@ urlpatterns = [
     # Transactions view
     path("transactions/", views.transactions, name="transactions"),
 
+    # Tagging a transaction
+    path("transactions/tag/<int:transaction_id>/", views.tag_transaction, name="tag_transaction"),
+
+
     # Budgets view
     path('budgets/', views.budgets, name='budgets'),
 ]

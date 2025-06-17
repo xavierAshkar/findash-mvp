@@ -1,10 +1,30 @@
 {% extends "base_app.html" %}
-
 {% block title %}Budgets{% endblock %}
 
 {% block content %}
   <h1 class="text-3xl font-bold mb-6">Your Budgets</h1>
 
-  <!-- Placeholder until data is added -->
-  <p class="text-gray-600">You haven't set any budgets yet. Add one to start tracking!</p>
+  <form method="post" class="mb-6">
+    {% csrf_token %}
+    <label class="block mb-2 font-semibold">Name</label>
+    <input type="text" name="name" class="border p-2 rounded w-full mb-4 bg-white text-black dark:bg-gray-800 dark:text-white" required>
+
+    <label class="block mb-2 font-semibold">Categories (comma-separated)</label>
+    <input type="text" name="categories" class="border p-2 rounded w-full mb-4 bg-white text-black dark:bg-gray-800 dark:text-white" placeholder="e.g. Food, Dining Out" required>
+
+    <label class="block mb-2 font-semibold">Monthly Budget Amount ($)</label>
+    <input type="number" name="amount" step="0.01" class="border p-2 rounded w-full mb-4 bg-white text-black dark:bg-gray-800 dark:text-white" required>
+
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Add Budget</button>
+  </form>
+
+  {% for budget in budget_data %}
+    <div class="mb-4 p-4 border rounded shadow">
+      <h2 class="text-xl font-bold">{{ budget.name }}</h2>
+      <p>Categories: {{ budget.categories|join:", " }}</p>
+      <p>Spent: ${{ budget.spent }} / ${{ budget.amount }}</p>
+    </div>
+  {% empty %}
+    <p>No budgets yet.</p>
+  {% endfor %}
 {% endblock %}
