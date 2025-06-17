@@ -4,5 +4,18 @@
 
 {% block content %}
   <h1 class="text-3xl font-bold mb-6">Your Cash Accounts</h1>
-  <p class="text-gray-600">This page will show your linked checking and savings accounts.</p>
+  {% if accounts %}
+  <ul class="space-y-4">
+    {% for account in accounts %}
+      <li class="bg-white shadow rounded p-4">
+        <div class="font-semibold text-lg">{{ account.name }}</div>
+        <div class="text-sm text-gray-500">{{ account.subtype|title }} • {{ account.mask }}</div>
+        <div class="mt-2 text-green-600 font-medium">${{ account.current_balance }}</div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-gray-600">You don’t have any linked cash accounts yet.</p>
+{% endif %}
+
 {% endblock %}
