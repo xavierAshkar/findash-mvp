@@ -21,9 +21,6 @@ from users import views as user_views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Django built-in auth views for login/logout
-    path('users/', include('django.contrib.auth.urls')),
-
     # Custom user views (register, etc.)
     path('users/', include('users.urls')),
 
