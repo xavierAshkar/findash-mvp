@@ -7,7 +7,7 @@ Handles public-facing views such as:
 """
 
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from .forms import CustomUserCreationForm
 
 def home(request):
@@ -45,3 +45,7 @@ def register(request):
 
     # Render the registration template with the form (either blank or with errors)
     return render(request, "registration/register.html", {"form": form})
+
+def logout_view(request):
+    logout(request)
+    return redirect("users:login")
