@@ -4,12 +4,19 @@
 
 {% block content %}
   <h1 class="text-3xl font-bold mb-6">Your Transactions</h1>
-  <form method="POST" action="{% url 'plaid:fetch_transactions' %}" class="mb-6">
-  {% csrf_token %}
-  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+  <!-- HTMX Sync Button -->
+  <button
+    hx-post="{% url 'plaid:fetch_transactions' %}"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    hx-trigger="click"
+    hx-swap="none"
+    hx-indicator="#sync-spinner"
+    onclick="location.reload()"
+    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-6"
+  >
     🔄 Sync Transactions
   </button>
-  </form>
+  <span id="sync-spinner" class="htmx-indicator hidden text-sm text-gray-500 ml-2">Syncing...</span>
   {% if transactions %}
   <ul class="space-y-4">
     {% for txn in transactions %}
@@ -18,8 +25,15 @@
         <div class="text-sm text-gray-500">
           {{ txn.date }} • {{ txn.account.name }}
         </div>
-        <div class="mt-1 text-sm text-blue-600">
-          Category: {{ txn.category }}
+        <div class="mt-1 text-sm text-blue-400">
+          Category:
+          {% if txn.category_main %}
+            {{ txn.category_main }}
+          {% elif txn.user_tag %}
+            {{ txn.user_tag }}
+          {% else %}
+            Uncategorized
+          {% endif %}
         </div>
         <div class="mt-2 font-medium {% if txn.amount > 0 %}text-red-600{% else %}text-green-600{% endif %}">
           ${{ txn.amount }}
