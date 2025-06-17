@@ -40,28 +40,13 @@
         const result = await exchangeRes.json();
 
         if (result.status === 'success') {
-          // Now fetch account data
-          const fetchRes = await fetch('/plaid/fetch-accounts/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': getCookie('csrftoken'),
-            },
-          });
-          const fetchResult = await fetchRes.json();
-
-          if (fetchResult.status === 'success') {
-            document.getElementById('message').textContent = 'Account linked and data fetched successfully!';
-            // Redirect to dashboard
-            window.location.href = "{% url 'core:dashboard' %}";
-          } else {
-            document.getElementById('message').textContent = 'Account linked but failed to fetch accounts: ' + fetchResult.error;
-          }
+          document.getElementById('message').textContent = 'Account linked successfully!';
+          window.location.href = "{% url 'core:dashboard' %}";
         } else {
           document.getElementById('message').textContent = 'Error linking account: ' + result.error;
         }
       },
-
+      
       onExit: (err, metadata) => {
         if (err) console.error('Plaid Link error:', err);
       },

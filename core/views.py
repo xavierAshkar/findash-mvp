@@ -8,6 +8,11 @@ Handles views for the main app experience after login:
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from plaid_link.models import PlaidItem, Account, Transaction
+from .models import Budget
+from django.utils import timezone
+from datetime import datetime
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
 
 @login_required
 def dashboard(request):
@@ -58,6 +63,59 @@ def transactions(request):
         account__plaid_item__user=request.user).order_by("-date")[:50]
     return render(request, "core/transactions.html", {"transactions": transactions})
 
+@require_POST
+@login_required
+def tag_transaction(request, transaction_id):
+    txn = get_object_or_404(Transaction, id=transaction_id, account__plaid_item__user=request.user)
+    tag = request.POST.get("tag", "").strip()
+    if tag:
+        txn.user_tag = tag
+        txn.save()
+    return redirect("core:transactions")
+
 @login_required
 def budgets(request):
-    return render(request, 'core/budgets.html')
+    if request.method == "POST":
+        name = request.POST.get("name")
+        categories = request.POST.getlist("categories")  # multiple categories
+        amount = request.POST.get("amount")
+
+        Budget.objects.create(
+            user=request.user,
+            name=name,
+            categories=categories,
+            amount=amount
+        )
+        return redirect('core:budgets')
+
+    budgets = Budget.objects.filter(user=request.user)
+    now = timezone.now()
+    month_start = datetime(now.year, now.month, 1)
+
+    # Gather transactions from this month
+    transactions = Transaction.objects.filter(
+        account__plaid_item__user=request.user,
+        date__gte=month_start
+    )
+
+    # Match against budgets
+    budget_data = []
+    for budget in budgets:
+        total_spent = sum(
+            t.amount
+            for t in transactions
+            if (
+                (t.user_tag and any(cat.lower() in t.user_tag.lower() for cat in budget.categories)) or
+                (not t.user_tag and t.category_main and any(cat.lower() in t.category_main.lower() for cat in budget.categories))
+            )
+        )
+        budget_data.append({
+            "name": budget.name,
+            "amount": budget.amount,
+            "spent": total_spent,
+            "categories": budget.categories,
+        })
+
+    return render(request, 'core/budgets.html', {
+        "budget_data": budget_data
+    })
