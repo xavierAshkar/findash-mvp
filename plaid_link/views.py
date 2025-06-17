@@ -124,6 +124,10 @@ def exchange_public_token(request):
         plaid_item.set_access_token(access_token)
         plaid_item.save()
 
+        # Automatically fetch accounts and transactions
+        fetch_accounts(request)
+        fetch_transactions(request)
+
         return JsonResponse({"status": "success"})
 
     except Exception as e:
@@ -242,7 +246,8 @@ def fetch_transactions(request):
                     "name": txn["name"],
                     "amount": txn["amount"],
                     "date": txn["date"],
-                    "category": ", ".join(txn["category"]) if txn.get("category") else None,
+                    "category_main": txn["category"][0] if txn.get("category") else None,
+                    "category_detailed": txn["category"][1] if txn.get("category") and len(txn["category"]) > 1 else None,
                     "merchant_name": txn.get("merchant_name"),
                     "payment_channel": txn.get("payment_channel"),
                 }

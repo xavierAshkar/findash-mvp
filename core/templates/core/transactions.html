@@ -6,16 +6,24 @@
   <h1 class="text-3xl font-bold mb-6">Your Transactions</h1>
   <!-- HTMX Sync Button -->
   <button
+    id="sync-button"
     hx-post="{% url 'plaid:fetch_transactions' %}"
     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
     hx-trigger="click"
     hx-swap="none"
     hx-indicator="#sync-spinner"
-    onclick="location.reload()"
     class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-6"
   >
     🔄 Sync Transactions
   </button>
+  <script>
+    document.body.addEventListener("htmx:afterOnLoad", function(event) {
+      const trigger = event.detail.requestConfig.elt;
+      if (trigger && trigger.id === "sync-button") {
+        window.location.reload();  // page reloads only when sync is complete
+      }
+    });
+  </script>
   <span id="sync-spinner" class="htmx-indicator hidden text-sm text-gray-500 ml-2">Syncing...</span>
   {% if transactions %}
   <ul class="space-y-4">
@@ -38,6 +46,17 @@
         <div class="mt-2 font-medium {% if txn.amount > 0 %}text-red-600{% else %}text-green-600{% endif %}">
           ${{ txn.amount }}
         </div>
+
+        <!-- Add tag form -->
+        <form method="post" action="{% url 'core:tag_transaction' txn.id %}" class="mt-3">
+          {% csrf_token %}
+          <label class="text-sm text-gray-600 block">Tag this transaction:</label>
+          <div class="flex items-center gap-2 mt-1">
+            <input type="text" name="tag" value="{{ txn.user_tag|default:'' }}" placeholder="e.g. groceries" class="border border-gray-300 p-2 rounded w-full bg-white text-black"
+              class="border px-2 py-1 rounded text-sm w-48" />
+            <button type="submit" class="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">Save</button>
+          </div>
+        </form>
       </li>
     {% endfor %}
   </ul>
