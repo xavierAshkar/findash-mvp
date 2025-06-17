@@ -1,44 +1,8 @@
 {% extends "base_app.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Transactions{% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
-<h1 class="text-3xl font-bold mb-6">Your Accounts</h1>
-
-{% if accounts %}
-  <!-- Display categorized account lists -->
-  <div class="space-y-8">
-
-    {% for acct_type in account_types %}
-      <div>
-        <!-- Section Header -->
-        <h2 class="text-2xl font-semibold capitalize mb-2">{{ acct_type }} Accounts</h2>
-
-        <!-- List accounts that match this type -->
-        <ul class="list-disc list-inside">
-          {% for account in accounts %}
-            {% if account.type == acct_type %}
-              <li>
-                <strong>{{ account.name }}</strong>
-                {% if account.official_name %} ({{ account.official_name }}){% endif %}<br>
-                Available Balance: ${{ account.available_balance|default:"N/A" }}<br>
-                Current Balance: ${{ account.current_balance|default:"N/A" }}
-              </li>
-            {% endif %}
-          {% empty %}
-            <li>No {{ acct_type }} accounts linked.</li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endfor %}
-
-  </div>
-{% else %}
-  <!-- If no accounts are linked, prompt to connect one -->
-  <p>
-    You have no accounts linked.
-    <a href="{% url 'plaid:link_account' %}" class="text-blue-600 underline">Link your bank account now</a>.
-  </p>
-{% endif %}
+  <h1 class="text-3xl font-bold mb-6">Your Transactions</h1>
+  <p class="text-gray-600">You don't have any transactions to show. Add one to start tracking!</p>
 {% endblock %}

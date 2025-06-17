@@ -9,7 +9,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from plaid_link.models import PlaidItem, Account, Transaction
 
-
 @login_required
 def dashboard(request):
     """
@@ -31,6 +30,7 @@ def dashboard(request):
     # Filter account types into general categories for display
     account_types = ["depository", "credit"]
 
+
     # Render the dashboard page with the user’s accounts
     return render(request, 'core/dashboard.html', {
         'accounts': accounts,
@@ -51,3 +51,7 @@ def credit_accounts(request):
 def transactions(request):
     transactions = Transaction.objects.filter(account__plaid_item__user=request.user).order_by("-date")[:50]
     return render(request, "core/transactions.html", {"transactions": transactions})
+
+@login_required
+def budgets(request):
+    return render(request, 'core/budgets.html')
