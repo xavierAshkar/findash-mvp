@@ -24,6 +24,9 @@
         <a href="{% url 'core:transactions' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/transactions/' %}bg-gray-700{% endif %}">
           🔁 Transactions
         </a>
+        <a href="{% url 'core:budgets' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/budgets/' %}bg-gray-700{% endif %}">
+          📊 Budgets
+        </a>
       </nav>
     </aside>
 

@@ -2,7 +2,7 @@
 core/urls.py
 
 Routes for the authenticated app experience.
-Includes dashboard, accounts, transactions, etc.
+Includes dashboard, accounts, transactions, budgets, etc.
 """
 
 from django.urls import path
@@ -22,4 +22,7 @@ urlpatterns = [
 
     # Transactions view
     path("transactions/", views.transactions, name="transactions"),
+
+    # Budgets view
+    path('budgets/', views.budgets, name='budgets'),
 ]
