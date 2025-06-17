@@ -4,5 +4,31 @@
 
 {% block content %}
   <h1 class="text-3xl font-bold mb-6">Your Transactions</h1>
-  <p class="text-gray-600">You don't have any transactions to show. Add one to start tracking!</p>
+  <form method="POST" action="{% url 'plaid:fetch_transactions' %}" class="mb-6">
+  {% csrf_token %}
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    🔄 Sync Transactions
+  </button>
+  </form>
+  {% if transactions %}
+  <ul class="space-y-4">
+    {% for txn in transactions %}
+      <li class="bg-white shadow rounded p-4">
+        <div class="font-semibold text-lg">{{ txn.name }}</div>
+        <div class="text-sm text-gray-500">
+          {{ txn.date }} • {{ txn.account.name }}
+        </div>
+        <div class="mt-1 text-sm text-blue-600">
+          Category: {{ txn.category }}
+        </div>
+        <div class="mt-2 font-medium {% if txn.amount > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+          ${{ txn.amount }}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-gray-600">You don’t have any transactions to show.</p>
+{% endif %}
+
 {% endblock %}

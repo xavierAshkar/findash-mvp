@@ -8,14 +8,12 @@ Handles all Plaid-related API calls and views:
 - Render account linking page
 """
 
-from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponseBadRequest
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from decouple import config
+# Standard lib
 import json
+from datetime import date, timedelta
 
+# Third-party
+from decouple import config
 from plaid.configuration import Configuration
 from plaid.api_client import ApiClient
 from plaid.api import plaid_api
@@ -24,11 +22,20 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 
-from .models import PlaidItem, Account
-from .utils import encrypt_token
+# Django
+from django.shortcuts import render, redirect
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+
+# Local
+from .models import PlaidItem, Account, Transaction
+from .utils import encrypt_token, decrypt_token
 
 
 
@@ -177,6 +184,75 @@ def fetch_accounts(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
+
+# -----------------------------
+# Fetch and Save Transactions
+# -----------------------------
+
+@require_POST
+@login_required
+def fetch_transactions(request):
+    """
+    Fetches transactions from Plaid and stores them in the database.
+    """
+    try:
+        from .models import Transaction  # If not imported at top
+
+        # Get user's PlaidItem and access token
+        plaid_item = PlaidItem.objects.get(user=request.user)
+        access_token = plaid_item.get_access_token()
+
+        # Setup Plaid client
+        configuration = Configuration(
+            host="https://sandbox.plaid.com",
+            api_key={
+                "clientId": config("PLAID_CLIENT_ID"),
+                "secret": config("PLAID_SECRET"),
+            }
+        )
+        client = plaid_api.PlaidApi(ApiClient(configuration))
+
+        # Date range for the last 30 days
+        end_date = date.today()
+        start_date = end_date - timedelta(days=30)
+
+        # Fetch transactions
+        request_data = TransactionsGetRequest(
+            access_token=access_token,
+            start_date=start_date,
+            end_date=end_date
+        )
+        response = client.transactions_get(request_data)
+        transactions = response.to_dict()["transactions"]
+
+        # Build map of Plaid account IDs to Account objects
+        account_map = {
+            acct.account_id: acct
+            for acct in Account.objects.filter(plaid_item=plaid_item)
+        }
+
+        # Store transactions in DB
+        created_count = 0
+        for txn in transactions:
+            Transaction.objects.update_or_create(
+                transaction_id=txn["transaction_id"],
+                defaults={
+                    "account": account_map[txn["account_id"]],
+                    "name": txn["name"],
+                    "amount": txn["amount"],
+                    "date": txn["date"],
+                    "category": ", ".join(txn["category"]) if txn.get("category") else None,
+                    "merchant_name": txn.get("merchant_name"),
+                    "payment_channel": txn.get("payment_channel"),
+                }
+            )
+            created_count += 1
+
+        return JsonResponse({"status": "success", "count": created_count})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 # -----------------------------
