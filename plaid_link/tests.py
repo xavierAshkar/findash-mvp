@@ -15,11 +15,17 @@ class PlaidViewsTests(TestCase):
         self.user = User.objects.create_user(email="x@example.com", password="pw")
         self.client.login(email="x@example.com", password="pw")
 
-    # Test: Link token endpoint returns valid JSON
-    def test_create_link_token_works(self):
+    # Test: Link token creation works and returns a token (mocked)
+    @patch("plaid_link.views.plaid_api.PlaidApi.link_token_create")
+    def test_create_link_token_works(self, mock_link_token_create):
+        mock_response = MagicMock()
+        mock_response.to_dict.return_value = {"link_token": "mock-token"}
+        mock_link_token_create.return_value = mock_response
+
         response = self.client.get(reverse('plaid:create_link_token'))
         self.assertEqual(response.status_code, 200)
         self.assertIn("link_token", response.json())
+
 
     # Test: Fetch accounts fails cleanly if no PlaidItem is linked
     def test_fetch_accounts_requires_plaiditem(self):
