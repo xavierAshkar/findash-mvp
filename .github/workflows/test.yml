@@ -27,7 +27,7 @@ jobs:
       DJANGO_SECRET_KEY: testkey
       PLAID_CLIENT_ID: fake
       PLAID_SECRET: fake
-      FERNET_KEY: fakefernetkeyforci==
+      FERNET_KEY: oi7xAdhnSEw7ckOs6py3nxChgI1pBU0PCWYVxB8LT8Q=
       DB_NAME: test_db
       DB_USER: postgres
       DB_PASSWORD: postgres
