@@ -135,3 +135,5 @@ TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates')]
 
 # Redirect logged-in users to dashboard instead of /accounts/profile/
 LOGIN_REDIRECT_URL = '/plaid/link-account/'
+
+STATIC_URL = '/static/'
