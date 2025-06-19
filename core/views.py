@@ -43,19 +43,11 @@ def dashboard(request):
     })
 
 @login_required
-def cash_accounts(request):
-    accounts = Account.objects.filter(
-        plaid_item__user=request.user, 
-            type="depository",
-            subtype__in=["checking", "savings"])
-    return render(request, "core/cash_accounts.html", {"accounts": accounts})
-
-@login_required
-def credit_accounts(request):
-    accounts = Account.objects.filter(
-        plaid_item__user=request.user, 
-        type="credit")
-    return render(request, "core/credit_accounts.html", {"accounts": accounts})
+def accounts_view(request):
+    accounts = Account.objects.filter(plaid_item__user=request.user)
+    return render(request, "core/accounts.html", {
+        "accounts": accounts,
+    })
 
 @login_required
 def transactions(request):
