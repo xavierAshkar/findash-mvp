@@ -47,12 +47,12 @@
     <!-- Sidebar -->
     <aside
       x-cloak
-      :class="sidebarOpen ? 'w-[250px]' : 'w-[60px]'"
+      :class="sidebarOpen ? 'w-[250px]' : 'w-[72px]'"
       class="bg-sidebarBg h-full px-[12px] transition-all duration-200 relative flex flex-col items-center"
     >
 
     <!-- Logo Row -->
-    <div class="w-full h-[60px] flex items-center justify-between">
+    <div class="w-full h-[60px] flex items-center justify-between pl-[6px]">
       <!-- Logo with hover-triggered expand button -->
       <div class="relative group w-[36px] h-[36px] flex items-center justify-center">
         <img
@@ -68,7 +68,7 @@
           x-show="!sidebarOpen"
           class="absolute inset-0 flex items-center justify-center
                 rounded-full border-[2px] border-transparent
-                hover:border-hoverBorder hover:shadow-inner
+                hover:border-hoverBorder hover:shadow-lg
                 transition cursor-pointer opacity-0 group-hover:opacity-100"
         >
           <img
@@ -85,19 +85,19 @@
         x-show="sidebarOpen"
       >
         <!-- Notifications -->
-        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-inner transition">
+        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition">
           <img src="{% static 'icons/notifications.svg' %}" class="w-5 h-5" />
         </button>
 
         <!-- Settings -->
-        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-inner transition">
+        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition">
           <img src="{% static 'icons/settings.svg' %}" alt="Settings" class="w-5 h-5" />
         </button>
 
         <!-- Collapse -->
         <button
           @click="sidebarOpen = false"
-          class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-inner transition cursor-pointer"
+          class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition cursor-pointer"
         >
           <img
             src="{% static 'icons/collapse.svg' %}"
@@ -111,35 +111,35 @@
     <!-- Navigation -->
     <nav class="mt-6 flex flex-col space-y-4 w-full">
       <a href="{% url 'core:dashboard' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
                 {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}">
         <span>🏠</span>
         <span x-show="sidebarOpen" class="transition-all duration-300">Dashboard</span>
       </a>
 
       <a href="{% url 'core:cash_accounts' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
                 {% if request.path == '/cash/' %}bg-hoverBg{% endif %}">
         <span>💵</span>
         <span x-show="sidebarOpen" class="transition-all duration-300">Accounts</span>
       </a>
 
       <a href="{% url 'core:credit_accounts' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
                 {% if request.path == '/credit/' %}bg-hoverBg{% endif %}">
         <span>💳</span>
         <span x-show="sidebarOpen" class="transition-all duration-300">Credit</span>
       </a>
 
       <a href="{% url 'core:transactions' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
                 {% if request.path == '/transactions/' %}bg-hoverBg{% endif %}">
         <span>🔁</span>
         <span x-show="sidebarOpen" class="transition-all duration-300">Transactions</span>
       </a>
 
       <a href="{% url 'core:budgets' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
                 {% if request.path == '/budgets/' %}bg-hoverBg{% endif %}">
         <span>📊</span>
         <span x-show="sidebarOpen" class="transition-all duration-300">Budgets</span>
