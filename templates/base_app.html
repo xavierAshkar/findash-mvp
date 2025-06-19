@@ -1,56 +1,167 @@
 <!-- core/templates/base_app.html -->
 <!DOCTYPE html>
 <html lang="en">
+  {% load static %}
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}Findash{% endblock %}</title>
+
+  <!-- Load Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+  <!-- Define your custom colors -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primaryBg: '#101013',
+            sidebarBg: '#101013',
+            cardBg: '#1e293b',
+            hoverBg: '#0A0A0C',
+            hoverBorder: '#28282C',
+            accent: '#4f46e5',
+            textMain: '#ffffff',
+            textSubtle: '#9ca3af',
+          }
+        }
+      }
+    };
+  </script>
+  <!-- ✅ Optional libraries -->
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-  <a href="{% url 'users:logout' %}"
-    class="text-sm text-gray-500 hover:text-black dark:text-gray-300 dark:hover:text-white">
-    Logout
-  </a>
+<body 
+  x-data="{
+    sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? 'true')
+  }"
+  x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))"
+  class="bg-primaryBg text-textMain font-sans"
+>
+<div x-cloak>
   <div class="flex h-screen overflow-hidden">
+    
     <!-- Sidebar -->
-    <aside class="w-56 bg-gray-800 p-4 space-y-4">
-      <nav class="flex flex-col gap-4">
-        <a href="{% url 'core:dashboard' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/dashboard/' %}bg-gray-700{% endif %}">
-          🏠 Dashboard
-        </a>
-        <a href="{% url 'core:cash_accounts' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/cash/' %}bg-gray-700{% endif %}">
-          💵 Cash Accounts
-        </a>
-        <a href="{% url 'core:credit_accounts' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/credit/' %}bg-gray-700{% endif %}">
-          💳 Credit Cards
-        </a>
-        <a href="{% url 'core:transactions' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/transactions/' %}bg-gray-700{% endif %}">
-          🔁 Transactions
-        </a>
-        <a href="{% url 'core:budgets' %}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 {% if request.path == '/budgets/' %}bg-gray-700{% endif %}">
-          📊 Budgets
-        </a>
-      </nav>
+    <aside
+      x-cloak
+      :class="sidebarOpen ? 'w-[250px]' : 'w-[60px]'"
+      class="bg-sidebarBg h-full px-[12px] transition-all duration-200 relative flex flex-col items-center"
+    >
+
+    <!-- Logo Row -->
+    <div class="w-full h-[60px] flex items-center justify-between">
+      <!-- Logo with hover-triggered expand button -->
+      <div class="relative group w-[36px] h-[36px] flex items-center justify-center">
+        <img
+          src="{% static 'icons/logo.svg' %}"
+          alt="Logo"
+          :class="sidebarOpen ? 'opacity-100' : 'transition group-hover:opacity-0'"
+          class="w-[36px] h-[36px]"
+        />
+
+        <!-- Expand button (shown only when collapsed + hovered) -->
+        <button
+          @click="sidebarOpen = true"
+          x-show="!sidebarOpen"
+          class="absolute inset-0 flex items-center justify-center
+                rounded-full border-[2px] border-transparent
+                hover:border-hoverBorder hover:shadow-inner
+                transition cursor-pointer opacity-0 group-hover:opacity-100"
+        >
+          <img
+            src="{% static 'icons/collapse.svg' %}"
+            alt="Expand"
+            class="w-5 h-5 pointer-events-none"
+          />
+        </button>
+      </div>
+
+      <!-- Sidebar icon buttons (shown only when expanded) -->
+      <div
+        class="flex items-center gap-[6px]"
+        x-show="sidebarOpen"
+      >
+        <!-- Notifications -->
+        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-inner transition">
+          <img src="{% static 'icons/notifications.svg' %}" class="w-5 h-5" />
+        </button>
+
+        <!-- Settings -->
+        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-inner transition">
+          <img src="{% static 'icons/settings.svg' %}" alt="Settings" class="w-5 h-5" />
+        </button>
+
+        <!-- Collapse -->
+        <button
+          @click="sidebarOpen = false"
+          class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-inner transition cursor-pointer"
+        >
+          <img
+            src="{% static 'icons/collapse.svg' %}"
+            alt="Collapse"
+            class="w-5 h-5 pointer-events-none"
+          />
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="mt-6 flex flex-col space-y-4 w-full">
+      <a href="{% url 'core:dashboard' %}"
+        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+                {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}">
+        <span>🏠</span>
+        <span x-show="sidebarOpen" class="transition-all duration-300">Dashboard</span>
+      </a>
+
+      <a href="{% url 'core:cash_accounts' %}"
+        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+                {% if request.path == '/cash/' %}bg-hoverBg{% endif %}">
+        <span>💵</span>
+        <span x-show="sidebarOpen" class="transition-all duration-300">Accounts</span>
+      </a>
+
+      <a href="{% url 'core:credit_accounts' %}"
+        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+                {% if request.path == '/credit/' %}bg-hoverBg{% endif %}">
+        <span>💳</span>
+        <span x-show="sidebarOpen" class="transition-all duration-300">Credit</span>
+      </a>
+
+      <a href="{% url 'core:transactions' %}"
+        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+                {% if request.path == '/transactions/' %}bg-hoverBg{% endif %}">
+        <span>🔁</span>
+        <span x-show="sidebarOpen" class="transition-all duration-300">Transactions</span>
+      </a>
+
+      <a href="{% url 'core:budgets' %}"
+        class="flex items-center gap-3 px-3 py-2 rounded hover:bg-hoverBg transition
+                {% if request.path == '/budgets/' %}bg-hoverBg{% endif %}">
+        <span>📊</span>
+        <span x-show="sidebarOpen" class="transition-all duration-300">Budgets</span>
+      </a>
+    </nav>
     </aside>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
       <!-- Header -->
-      <header class="bg-gray-700 h-16 flex items-center px-6 shadow">
+      <header class="bg-primaryBg h-[60px] flex items-center">
         <h1 class="text-xl font-semibold">Welcome back, {{ request.user.first_name|default:request.user.email }}</h1>
       </header>
 
       <!-- Body Content -->
-      <main class="flex-1 grid grid-cols-2 gap-6 p-6 overflow-y-auto">
-        {% block content %}
-        <!-- Left + Right Columns -->
-        <div class="bg-gray-800 rounded-lg p-4 h-[calc(100vh-8rem)]">Left Column</div>
-        <div class="bg-gray-800 rounded-lg p-4 h-[calc(100vh-8rem)]">Right Column</div>
-        {% endblock %}
+      <main class="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
+        {% block content %}{% endblock %}
       </main>
     </div>
   </div>
 
+  </div>
+</div>
 </body>
 </html>
