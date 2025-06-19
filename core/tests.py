@@ -58,14 +58,6 @@ class CoreViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Credit Card')
 
-    # Test: Only credit accounts are shown
-    def test_credit_accounts_filter(self):
-        item = PlaidItem.objects.create(user=self.user, item_id='mock')
-        Account.objects.create(plaid_item=item, account_id='c', name='Credit Card', type='credit', subtype='credit card')
-        response = self.client.get(reverse('core:credit_accounts'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Credit Card')
-
     # Test: Tagging a transaction sets the user_tag field
     def test_tag_transaction_applies_tag(self):
         item = PlaidItem.objects.create(user=self.user, item_id='mock')
