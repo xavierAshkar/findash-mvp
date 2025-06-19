@@ -2,166 +2,264 @@
 <!DOCTYPE html>
 <html lang="en">
   {% load static %}
-<head>
-  <meta charset="UTF-8">
-  <title>{% block title %}Findash{% endblock %}</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Findash{% endblock %}</title>
 
-  <!-- Load Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    [x-cloak] { display: none !important; }
-  </style>
-  <!-- Define your custom colors -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primaryBg: '#101013',
-            sidebarBg: '#101013',
-            cardBg: '#1e293b',
-            hoverBg: '#0A0A0C',
-            hoverBorder: '#28282C',
-            accent: '#4f46e5',
-            textMain: '#ffffff',
-            textSubtle: '#9ca3af',
-          }
-        }
+    <!-- Load Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      [x-cloak] {
+        display: none !important;
       }
-    };
-  </script>
-  <!-- ✅ Optional libraries -->
-  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-</head>
-<body 
-  x-data="{
+    </style>
+    <!-- Define your custom colors -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primaryBg: "#101013",
+              sidebarBg: "#101013",
+              cardHeader: "#1e293b",
+              cardBg: "#1e293b",
+              hoverBg: "#0A0A0C",
+              hoverBorder: "#78767E",
+              accent: "#4f46e5",
+              textMain: "#ffffff",
+              textSubtle: "#78767E",
+            },
+          },
+        },
+      };
+    </script>
+    <!-- ✅ Optional libraries -->
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+  </head>
+  <body
+    x-data="{
     sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? 'true')
   }"
-  x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))"
-  class="bg-primaryBg text-textMain font-sans"
->
-<div x-cloak>
-  <div class="flex h-screen overflow-hidden">
-    
-    <!-- Sidebar -->
-    <aside
-      x-cloak
-      :class="sidebarOpen ? 'w-[250px]' : 'w-[72px]'"
-      class="bg-sidebarBg h-full px-[12px] transition-all duration-200 relative flex flex-col items-center"
-    >
-
-    <!-- Logo Row -->
-    <div class="w-full h-[60px] flex items-center justify-between pl-[6px]">
-      <!-- Logo with hover-triggered expand button -->
-      <div class="relative group w-[36px] h-[36px] flex items-center justify-center">
-        <img
-          src="{% static 'icons/logo.svg' %}"
-          alt="Logo"
-          :class="sidebarOpen ? 'opacity-100' : 'transition group-hover:opacity-0'"
-          class="w-[36px] h-[36px]"
-        />
-
-        <!-- Expand button (shown only when collapsed + hovered) -->
-        <button
-          @click="sidebarOpen = true"
-          x-show="!sidebarOpen"
-          class="absolute inset-0 flex items-center justify-center
-                rounded-full border-[2px] border-transparent
-                hover:border-hoverBorder hover:shadow-lg
-                transition cursor-pointer opacity-0 group-hover:opacity-100"
+    x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))"
+    class="bg-primaryBg text-textMain font-sans"
+  >
+    <div x-cloak>
+      <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+          x-cloak
+          :class="sidebarOpen ? 'w-[250px]' : 'w-[72px]'"
+          class="bg-sidebarBg h-full px-[12px] transition-all duration-200 relative flex flex-col items-start"
         >
-          <img
-            src="{% static 'icons/collapse.svg' %}"
-            alt="Expand"
-            class="w-5 h-5 pointer-events-none"
-          />
-        </button>
-      </div>
+          <!-- Logo Row -->
+          <div
+            class="w-full h-[60px] flex items-center justify-between pl-[6px]"
+          >
+            <!-- Logo with hover-triggered expand button -->
+            <div
+              class="relative group w-[36px] h-[36px] flex items-center justify-center"
+            >
+              <img
+                src="{% static 'icons/logo.svg' %}"
+                alt="Logo"
+                :class="sidebarOpen ? 'opacity-100' : 'group-hover:opacity-0'"
+                class="w-[36px] h-[36px] flex-shrink-0"
+              />
 
-      <!-- Sidebar icon buttons (shown only when expanded) -->
-      <div
-        class="flex items-center gap-[6px]"
-        x-show="sidebarOpen"
-      >
-        <!-- Notifications -->
-        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition">
-          <img src="{% static 'icons/notifications.svg' %}" class="w-5 h-5" />
-        </button>
+              <!-- Expand button (shown only when collapsed + hovered) -->
+              <button
+                @click="sidebarOpen = true"
+                x-show="!sidebarOpen"
+                class="absolute inset-0 flex items-center justify-center rounded-full border-[2px] border-transparent hover:border-hoverBorder hover:shadow-lg transition cursor-pointer opacity-0 group-hover:opacity-100"
+              >
+                <img
+                  src="{% static 'icons/collapse.svg' %}"
+                  alt="Expand"
+                  class="w-5 h-5 pointer-events-none"
+                />
+              </button>
+            </div>
 
-        <!-- Settings -->
-        <button class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition">
-          <img src="{% static 'icons/settings.svg' %}" alt="Settings" class="w-5 h-5" />
-        </button>
+            <!-- Sidebar icon buttons (shown only when expanded) -->
+            <div class="flex items-center gap-[6px]" x-show="sidebarOpen">
+              <!-- Notifications -->
+              <button
+                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition"
+              >
+                <img
+                  src="{% static 'icons/notifications.svg' %}"
+                  class="w-5 h-5"
+                />
+              </button>
 
-        <!-- Collapse -->
-        <button
-          @click="sidebarOpen = false"
-          class="p-[8px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition cursor-pointer"
-        >
-          <img
-            src="{% static 'icons/collapse.svg' %}"
-            alt="Collapse"
-            class="w-5 h-5 pointer-events-none"
-          />
-        </button>
+              <!-- Settings -->
+              <button
+                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition"
+              >
+                <img
+                  src="{% static 'icons/settings.svg' %}"
+                  alt="Settings"
+                  class="w-5 h-5"
+                />
+              </button>
+
+              <!-- Collapse -->
+              <button
+                @click="sidebarOpen = false"
+                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition cursor-pointer"
+              >
+                <img
+                  src="{% static 'icons/collapse.svg' %}"
+                  alt="Collapse"
+                  class="w-5 h-5 pointer-events-none"
+                />
+              </button>
+            </div>
+          </div>
+
+          <!-- Navigation -->
+          <nav class="mt-6 flex flex-col space-y-[12px] w-full">
+            <a
+              href="{% url 'core:dashboard' %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}"
+            >
+              <div
+                class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
+              >
+                {% if request.path == '/dashboard/' %}
+                <img
+                  src="{% static 'icons/dashboard_icon_highlight.svg' %}"
+                  alt="Dashboard"
+                  class="w-[24px] h-5"
+                />
+                {% else %}
+                <img
+                  src="{% static 'icons/dashboard_icon.svg' %}"
+                  alt="Dashboard"
+                  class="w-5 h-5"
+                />
+                {% endif %}
+              </div>
+
+              <span
+                :class="sidebarOpen ? 'opacity-100 w-auto ml-3' : 'opacity-0 w-0 ml-0'"
+                class="transition-all duration-300 overflow-hidden whitespace-nowrap {% if request.path == '/dashboard/' %}text-primary font-semibold{% else %}text-gray-400{% endif %}"
+              >
+                Dashboard
+              </span>
+            </a>
+
+            <a
+              href="{% url 'core:transactions' %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/transactions/' %}bg-hoverBg{% endif %}"
+            >
+              <div
+                class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
+              >
+                {% if request.path == '/transactions/' %}
+                <img
+                  src="{% static 'icons/transactions_icon_highlight.svg' %}"
+                  alt="Transactions"
+                  class="w-5 h-5"
+                />
+                {% else %}
+                <img
+                  src="{% static 'icons/transactions_icon.svg' %}"
+                  alt="Transactions"
+                  class="w-5 h-5"
+                />
+                {% endif %}
+              </div>
+
+              <span
+                :class="sidebarOpen ? 'opacity-100 w-auto ml-3' : 'opacity-0 w-0 ml-0'"
+                class="transition-all duration-300 overflow-hidden whitespace-nowrap {% if request.path == '/transactions/' %}text-primary font-semibold{% else %}text-gray-400{% endif %}"
+              >
+                Transactions
+              </span>
+            </a>
+
+            <a
+              href="{% url 'core:accounts' %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/accounts/' %}bg-hoverBg{% endif %}"
+            >
+              <div
+                class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
+              >
+                {% if request.path == '/accounts/' %}
+                <img
+                  src="{% static 'icons/accounts_icon_highlight.svg' %}"
+                  alt="Accounts"
+                  class="w-5 h-5"
+                />
+                {% else %}
+                <img
+                  src="{% static 'icons/accounts_icon.svg' %}"
+                  alt="Accounts"
+                  class="w-5 h-5"
+                />
+                {% endif %}
+              </div>
+
+              <span
+                :class="sidebarOpen ? 'opacity-100 w-auto ml-3' : 'opacity-0 w-0 ml-0'"
+                class="transition-all duration-300 overflow-hidden whitespace-nowrap {% if request.path == '/accounts/' %}text-primary font-semibold{% else %}text-gray-400{% endif %}"
+              >
+                Accounts
+              </span>
+            </a>
+
+            <a
+              href="{% url 'core:budgets' %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/budgets/' %}bg-hoverBg{% endif %}"
+            >
+              <div
+                class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
+              >
+                {% if request.path == '/budgets/' %}
+                <img
+                  src="{% static 'icons/budgets_icon_highlight.svg' %}"
+                  alt="Budgets"
+                  class="w-5 h-5"
+                />
+                {% else %}
+                <img
+                  src="{% static 'icons/budgets_icon.svg' %}"
+                  alt="Budgets"
+                  class="w-5 h-5"
+                />
+                {% endif %}
+              </div>
+
+              <span
+                :class="sidebarOpen ? 'opacity-100 w-auto ml-3' : 'opacity-0 w-0 ml-0'"
+                class="transition-all duration-300 overflow-hidden whitespace-nowrap {% if request.path == '/budgets/' %}text-primary font-semibold{% else %}text-gray-400{% endif %}"
+              >
+                Budgets
+              </span>
+            </a>
+          </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+          <!-- Header -->
+          <header class="bg-primaryBg h-[60px] flex items-center">
+            <h1 class="text-xl font-semibold">
+              Welcome back, {{request.user.first_name|default:request.user.email }}
+            </h1>
+          </header>
+
+          <!-- Body Content -->
+          <main class="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
+            {% block content %}{% endblock %}
+          </main>
+        </div>
       </div>
     </div>
-
-    <!-- Navigation -->
-    <nav class="mt-6 flex flex-col space-y-4 w-full">
-      <a href="{% url 'core:dashboard' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
-                {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}">
-        <span>🏠</span>
-        <span x-show="sidebarOpen" class="transition-all duration-300">Dashboard</span>
-      </a>
-
-      <a href="{% url 'core:cash_accounts' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
-                {% if request.path == '/cash/' %}bg-hoverBg{% endif %}">
-        <span>💵</span>
-        <span x-show="sidebarOpen" class="transition-all duration-300">Accounts</span>
-      </a>
-
-      <a href="{% url 'core:credit_accounts' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
-                {% if request.path == '/credit/' %}bg-hoverBg{% endif %}">
-        <span>💳</span>
-        <span x-show="sidebarOpen" class="transition-all duration-300">Credit</span>
-      </a>
-
-      <a href="{% url 'core:transactions' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
-                {% if request.path == '/transactions/' %}bg-hoverBg{% endif %}">
-        <span>🔁</span>
-        <span x-show="sidebarOpen" class="transition-all duration-300">Transactions</span>
-      </a>
-
-      <a href="{% url 'core:budgets' %}"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition
-                {% if request.path == '/budgets/' %}bg-hoverBg{% endif %}">
-        <span>📊</span>
-        <span x-show="sidebarOpen" class="transition-all duration-300">Budgets</span>
-      </a>
-    </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Header -->
-      <header class="bg-primaryBg h-[60px] flex items-center">
-        <h1 class="text-xl font-semibold">Welcome back, {{ request.user.first_name|default:request.user.email }}</h1>
-      </header>
-
-      <!-- Body Content -->
-      <main class="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
-        {% block content %}{% endblock %}
-      </main>
-    </div>
-  </div>
-
-  </div>
-</div>
-</body>
+  </body>
 </html>

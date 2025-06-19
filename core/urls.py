@@ -14,11 +14,9 @@ urlpatterns = [
     # Dashboard view (main post-login homepage)
     path('dashboard/', views.dashboard, name='dashboard'),
 
-    # Cash accounts view
-    path("cash/", views.cash_accounts, name="cash_accounts"),
+    # Accounts view
+    path("accounts/", views.accounts_view, name="accounts"),
 
-    # Credit accounts view
-    path("credit/", views.credit_accounts, name="credit_accounts"),
 
     # Transactions view
     path("transactions/", views.transactions, name="transactions"),
