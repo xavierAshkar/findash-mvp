@@ -28,13 +28,35 @@ class CoreViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Budget.objects.filter(user=self.user, name='Food').exists())
 
-    # Test: Only depository (cash) accounts are shown
-    def test_cash_accounts_filter(self):
+    # Test: Accounts view shows all cash accounts linked to the user
+    def test_accounts_view_shows_cash_accounts(self):
         item = PlaidItem.objects.create(user=self.user, item_id='mock')
-        Account.objects.create(plaid_item=item, account_id='x', name='Checking', type='depository', subtype='checking')
-        response = self.client.get(reverse('core:cash_accounts'))
+        Account.objects.create(
+            plaid_item=item,
+            account_id='x',
+            name='Checking',
+            type='depository',
+            subtype='checking',
+            current_balance=100
+        )
+        response = self.client.get(reverse('core:accounts'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Checking')
+
+    # Test: Accounts view shows all credit accounts linked to the user
+    def test_accounts_view_shows_credit_accounts(self):
+        item = PlaidItem.objects.create(user=self.user, item_id='mock')
+        Account.objects.create(
+            plaid_item=item,
+            account_id='c',
+            name='Credit Card',
+            type='credit',
+            subtype='credit card',
+            current_balance=250
+        )
+        response = self.client.get(reverse('core:accounts'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Credit Card')
 
     # Test: Only credit accounts are shown
     def test_credit_accounts_filter(self):
