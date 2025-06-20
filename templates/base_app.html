@@ -9,6 +9,9 @@
     <!-- Load Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      .shadow-left-lg {
+        box-shadow: -6px 0 12px -6px rgba(0, 0, 0, 0.25);
+      }
       [x-cloak] {
         display: none !important;
       }
@@ -19,13 +22,13 @@
         theme: {
           extend: {
             colors: {
-              primaryBg: "#101013",
+              primaryBg: "#202024",
               sidebarBg: "#101013",
-              cardHeader: "#1e293b",
-              cardBg: "#1e293b",
+              cardHeader: "#313035",
+              cardBg: "#202024",
               hoverBg: "#0A0A0C",
               hoverBorder: "#78767E",
-              accent: "#4f46e5",
+              accent: "#6760A6",
               textMain: "#ffffff",
               textSubtle: "#78767E",
             },
@@ -40,13 +43,19 @@
       defer
     ></script>
   </head>
-  <body
-    x-data="{
-    sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? 'true')
+<body
+  x-data="{
+    sidebarOpen: window.innerWidth > window.screen.width / 2,
+    updateSidebarState() {
+      this.sidebarOpen = window.innerWidth > window.screen.width / 2;
+    }
   }"
-    x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))"
-    class="bg-primaryBg text-textMain font-sans"
-  >
+  x-init="
+    updateSidebarState();
+    window.addEventListener('resize', () => updateSidebarState());
+  "
+  class="bg-primaryBg text-textMain font-sans"
+>
     <div x-cloak>
       <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
@@ -246,12 +255,14 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col shadow-left-lg z-10">
           <!-- Header -->
-          <header class="bg-primaryBg h-[60px] flex items-center">
-            <h1 class="text-xl font-semibold">
-              Welcome back, {{request.user.first_name|default:request.user.email }}
-            </h1>
+          <header class="bg-primaryBg h-[60px] flex items-center justify-between px-6">
+            {% block header %}
+              <h1 class="text-xl font-semibold">
+                Welcome back, {{ request.user.first_name|default:request.user.email }}
+              </h1>
+            {% endblock %}
           </header>
 
           <!-- Body Content -->
