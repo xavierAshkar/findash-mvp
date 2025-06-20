@@ -181,7 +181,9 @@ def fetch_accounts(request):
                 }
             )
 
-        return JsonResponse({"status": "success", "count": len(accounts)})
+        response = JsonResponse({"status": "success", "count": len(accounts)})
+        response["HX-Trigger"] = "refreshComplete"
+        return response
 
     except PlaidItem.DoesNotExist:
         return JsonResponse({"error": "Plaid item not found."}, status=404)
@@ -267,14 +269,7 @@ def fetch_transactions(request):
 @login_required
 def link_account(request):
     """
-    Renders the Plaid account linking page,
-    or redirects to the dashboard if accounts are already linked.
+    Renders the Plaid account linking page.
+    Used after registration or when user manually clicks “Add Account.”
     """
-    has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
-
-    if has_plaid_item:
-        # User already linked an account — redirect to dashboard
-        return redirect('core:dashboard')
-
-    # Show account linking interface
     return render(request, 'plaid_link/link_account.html')

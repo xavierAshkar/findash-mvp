@@ -66,7 +66,7 @@
         >
           <!-- Logo Row -->
           <div
-            class="w-full h-[60px] flex items-center justify-between pl-[6px]"
+            class="w-full h-[72px] flex items-center justify-between pl-[6px]"
           >
             <!-- Logo with hover-triggered expand button -->
             <div
@@ -83,7 +83,7 @@
               <button
                 @click="sidebarOpen = true"
                 x-show="!sidebarOpen"
-                class="absolute inset-0 flex items-center justify-center rounded-full border-[2px] border-transparent hover:border-hoverBorder hover:shadow-lg transition cursor-pointer opacity-0 group-hover:opacity-100"
+                class="absolute inset-0 flex items-center justify-center rounded-full border-[2px] border-transparent hover:border-hoverBorder hover:bg-hoverBg hover:shadow-lg transition cursor-pointer opacity-0 group-hover:opacity-100"
               >
                 <img
                   src="{% static 'icons/collapse.svg' %}"
@@ -131,7 +131,7 @@
           </div>
 
           <!-- Navigation -->
-          <nav class="mt-6 flex flex-col space-y-[12px] w-full">
+          <nav class="mt-[12px] flex flex-col space-y-[12px] w-full">
             <a
               href="{% url 'core:dashboard' %}"
               class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}"
@@ -257,7 +257,7 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col shadow-left-lg z-10">
           <!-- Header -->
-          <header class="bg-primaryBg h-[60px] flex items-center justify-between px-6">
+          <header class="bg-primaryBg h-[72px] flex items-center justify-between px-[24px]">
             {% block header %}
               <h1 class="text-xl font-semibold">
                 Welcome back, {{ request.user.first_name|default:request.user.email }}
@@ -266,11 +266,18 @@
           </header>
 
           <!-- Body Content -->
-          <main class="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
+          <main class="flex-1 flex flex-col gap-6 p-[24px] overflow-y-auto">
             {% block content %}{% endblock %}
           </main>
         </div>
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.addEventListener("refreshComplete", function () {
+          location.reload();
+        });
+      });
+    </script>
   </body>
 </html>
