@@ -37,8 +37,8 @@ def register(request):
             # Log the user in after successful registration
             login(request, user)
 
-            # Redirect user to their dashboard
-            return redirect('core:dashboard')
+            # Redirect user to link accounts page
+            return redirect('plaid:link_account')
     else:
         # If GET request, instantiate a blank registration form
         form = CustomUserCreationForm()
