@@ -1,56 +1,79 @@
 {% extends "base_app.html" %}
+
 {% block title %}Accounts{% endblock %}
 
+{% block header %}
+  <div class="flex items-center justify-between w-full">
+    <!-- Left: Page Title -->
+    <h1 class="text-[30px] font-semibold">Accounts</h1>
+
+    <!-- Right: Action Buttons -->
+    <div class="flex gap-3 pr-[24px] pt-[12px]">
+      <!-- Refresh Accounts (POST to fetch-accounts) -->
+      <form
+        hx-post="{% url 'plaid:fetch_accounts' %}"
+        hx-swap="none"
+        hx-trigger="click"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      >
+        <button
+          type="submit"
+          class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md border-[2px] border-transparent hover:bg-hoverBg hover:border-cardHeader hover:shadow transition cursor-pointer"
+        >
+          Refresh all
+        </button>
+      </form>
+
+      <!-- Add Account (to Plaid Link) -->
+      <a
+        href="{% url 'plaid:link_account' %}"
+        class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
+      >
+        + Add account
+      </a>
+    </div>
+  </div>
+{% endblock %}
+
 {% block content %}
-  <h1 class="text-3xl font-bold mb-6">Your Accounts</h1>
 
-  {% with cash_accounts=accounts|dictsort:"name" %}
-    {% if accounts %}
-      <div class="space-y-8">
+  {% if accounts %}
+    <div class="space-y-8">
 
-        <!-- Cash Accounts -->
-        {% if accounts|length > 0 %}
-          {% if accounts|dictsort:"type" %}
-            <div>
-              <h2 class="text-2xl font-semibold mb-2">Cash Accounts</h2>
-              <ul class="space-y-4">
-                {% for account in accounts %}
-                  {% if account.type == "depository" %}
-                    <li class="bg-white shadow rounded p-4">
-                      <div class="font-semibold text-lg">{{ account.name }}</div>
-                      <div class="text-sm text-gray-500">{{ account.subtype|title }} • {{ account.mask }}</div>
-                      <div class="mt-2 text-green-600 font-medium">${{ account.current_balance }}</div>
-                    </li>
-                  {% endif %}
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
-        {% endif %}
-
-        <!-- Credit Accounts -->
-        {% if accounts|length > 0 %}
-          {% if accounts|dictsort:"type" %}
-            <div>
-              <h2 class="text-2xl font-semibold mt-6 mb-2">Credit Cards</h2>
-              <ul class="space-y-4">
-                {% for account in accounts %}
-                  {% if account.type == "credit" %}
-                    <li class="bg-white shadow rounded p-4">
-                      <div class="font-semibold text-lg">{{ account.name }}</div>
-                      <div class="text-sm text-gray-500">{{ account.official_name }} • ****{{ account.mask }}</div>
-                      <div class="mt-2 text-red-600 font-medium">Balance: ${{ account.current_balance }}</div>
-                    </li>
-                  {% endif %}
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
-        {% endif %}
-
+      <!-- Cash Accounts -->
+      <div>
+        <h2 class="text-2xl font-semibold mb-2">Cash Accounts</h2>
+        <ul class="space-y-4">
+          {% for account in accounts %}
+            {% if account.type == "depository" %}
+              <li class="bg-white shadow rounded p-4">
+                <div class="font-semibold text-lg">{{ account.name }}</div>
+                <div class="text-sm text-gray-500">{{ account.subtype|title }} • {{ account.mask }}</div>
+                <div class="mt-2 text-green-600 font-medium">${{ account.current_balance }}</div>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
       </div>
-    {% else %}
-      <p class="text-gray-600">You don’t have any linked accounts yet.</p>
-    {% endif %}
-  {% endwith %}
+
+      <!-- Credit Accounts -->
+      <div>
+        <h2 class="text-2xl font-semibold mt-6 mb-2">Credit Cards</h2>
+        <ul class="space-y-4">
+          {% for account in accounts %}
+            {% if account.type == "credit" %}
+              <li class="bg-white shadow rounded p-4">
+                <div class="font-semibold text-lg">{{ account.name }}</div>
+                <div class="text-sm text-gray-500">{{ account.official_name }} • ****{{ account.mask }}</div>
+                <div class="mt-2 text-red-600 font-medium">Balance: ${{ account.current_balance }}</div>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  {% else %}
+    <p class="text-gray-600">You don’t have any linked accounts yet.</p>
+  {% endif %}
 {% endblock %}
