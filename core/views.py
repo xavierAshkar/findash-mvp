@@ -13,6 +13,7 @@ from django.utils import timezone
 from datetime import datetime
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
+from decimal import Decimal
 
 @login_required
 def dashboard(request):
@@ -45,9 +46,39 @@ def dashboard(request):
 @login_required
 def accounts_view(request):
     accounts = Account.objects.filter(plaid_item__user=request.user)
+
+    # Filters
+    checking_accounts = [a for a in accounts if a.subtype == "checking"]
+    savings_accounts = [a for a in accounts if a.subtype == "savings"]
+    credit_card_accounts = [a for a in accounts if a.type == "credit"]
+
+    # Totals
+    total_checking = sum(Decimal(a.current_balance) for a in checking_accounts)
+    total_savings = sum(Decimal(a.current_balance) for a in savings_accounts)
+    total_credit = sum(Decimal(a.current_balance) for a in credit_card_accounts)
+
+    # Asset/Liability classification
+    asset_accounts = [
+        a for a in accounts if a.type == "depository" and Decimal(a.current_balance) >= 0
+    ]
+    liability_accounts = [
+        a for a in accounts if a.type in ["credit", "loan"] or Decimal(a.current_balance) < 0
+    ]
+
+    total_assets = sum(Decimal(a.current_balance) for a in asset_accounts)
+    total_liabilities = sum(Decimal(a.current_balance) for a in liability_accounts)
+    net_worth = total_assets + total_liabilities
+
     return render(request, "core/accounts.html", {
         "accounts": accounts,
+        "total_assets": total_assets,
+        "total_liabilities": total_liabilities,
+        "net_worth": net_worth,
+        "total_checking": total_checking,
+        "total_savings": total_savings,
+        "total_credit": total_credit,
     })
+
 
 @login_required
 def transactions(request):

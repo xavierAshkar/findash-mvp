@@ -6,6 +6,8 @@
     <meta charset="UTF-8" />
     <title>{% block title %}Findash{% endblock %}</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Load Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -21,6 +23,9 @@
       tailwind.config = {
         theme: {
           extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
             colors: {
               primaryBg: "#202024",
               sidebarBg: "#101013",
@@ -257,7 +262,7 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col shadow-left-lg z-10">
           <!-- Header -->
-          <header class="bg-primaryBg h-[72px] flex items-center justify-between px-[24px]">
+          <header class="bg-primaryBg h-[72px] flex items-center justify-between px-[36px]">
             {% block header %}
               <h1 class="text-xl font-semibold">
                 Welcome back, {{ request.user.first_name|default:request.user.email }}
@@ -266,7 +271,7 @@
           </header>
 
           <!-- Body Content -->
-          <main class="flex-1 flex flex-col gap-6 p-[24px] overflow-y-auto">
+          <main class="flex-1 flex flex-col overflow-y-auto px-[24px]">
             {% block content %}{% endblock %}
           </main>
         </div>
