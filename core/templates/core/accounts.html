@@ -4,12 +4,9 @@
 
 {% block header %}
   <div class="flex items-center justify-between w-full">
-    <!-- Left: Page Title -->
-    <h1 class="text-[30px] font-semibold">Accounts</h1>
+    <h1 class="text-[32px] font-bold">Accounts</h1>
 
-    <!-- Right: Action Buttons -->
-    <div class="flex gap-3 pr-[24px] pt-[12px]">
-      <!-- Refresh Accounts (POST to fetch-accounts) -->
+    <div class="flex gap-[12px] ">
       <form
         hx-post="{% url 'plaid:fetch_accounts' %}"
         hx-swap="none"
@@ -18,13 +15,12 @@
       >
         <button
           type="submit"
-          class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md border-[2px] border-transparent hover:bg-hoverBg hover:border-cardHeader hover:shadow transition cursor-pointer"
+          class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-cardHeader border-[2px] border-transparent hover:bg-hoverBg hover:border-cardHeader hover:shadow transition cursor-pointer"
         >
           Refresh all
         </button>
       </form>
 
-      <!-- Add Account (to Plaid Link) -->
       <a
         href="{% url 'plaid:link_account' %}"
         class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
@@ -36,44 +32,113 @@
 {% endblock %}
 
 {% block content %}
+{% if accounts %}
+<div class="flex gap-[18px]">
+  <!-- Left Column (Assets) -->
+  <div class="w-1/2 flex flex-col gap-[18px]">
 
-  {% if accounts %}
-    <div class="space-y-8">
-
-      <!-- Cash Accounts -->
-      <div>
-        <h2 class="text-2xl font-semibold mb-2">Cash Accounts</h2>
-        <ul class="space-y-4">
-          {% for account in accounts %}
-            {% if account.type == "depository" %}
-              <li class="bg-white shadow rounded p-4">
-                <div class="font-semibold text-lg">{{ account.name }}</div>
-                <div class="text-sm text-gray-500">{{ account.subtype|title }} • {{ account.mask }}</div>
-                <div class="mt-2 text-green-600 font-medium">${{ account.current_balance }}</div>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
+    <!-- Assets Summary -->
+    <div class="w-full rounded-xl shadow-xl overflow-hidden">
+      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Assets</h3>
+          <p class="text-sm text-green-500">+2.0% <span class="text-textSubtle ml-2">1 month change</span></p>
+        </div>
+        <p class="text-lg font-semibold text-white">${{ total_assets|floatformat:2 }}</p>
       </div>
-
-      <!-- Credit Accounts -->
-      <div>
-        <h2 class="text-2xl font-semibold mt-6 mb-2">Credit Cards</h2>
-        <ul class="space-y-4">
-          {% for account in accounts %}
-            {% if account.type == "credit" %}
-              <li class="bg-white shadow rounded p-4">
-                <div class="font-semibold text-lg">{{ account.name }}</div>
-                <div class="text-sm text-gray-500">{{ account.official_name }} • ****{{ account.mask }}</div>
-                <div class="mt-2 text-red-600 font-medium">Balance: ${{ account.current_balance }}</div>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
-
     </div>
-  {% else %}
-    <p class="text-gray-600">You don’t have any linked accounts yet.</p>
-  {% endif %}
+
+    <!-- Checking -->
+    <div class="w-full rounded-xl shadow-xl overflow-hidden">
+      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Checkings</h3>
+          <p class="text-sm text-green-500">+2.4% <span class="text-textSubtle ml-2">1 month change</span></p>
+        </div>
+        <p class="text-lg font-semibold text-white">${{ total_checking|floatformat:2 }}</p>
+      </div>
+      <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
+        {% for account in accounts %}
+          {% if account.subtype == "checking" %}
+            <li class="flex justify-between items-center">
+              <div>
+                <p class="text-base text-white">{{ account.name }}</p>
+                <p class="text-sm text-textSubtle">•••• {{ account.mask }}</p>
+              </div>
+              <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Savings -->
+    <div class="w-full rounded-xl shadow-xl overflow-hidden">
+      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Savings</h3>
+          <p class="text-sm text-green-500">+4.1% <span class="text-textSubtle ml-2">1 month change</span></p>
+        </div>
+        <p class="text-lg font-semibold text-white">${{ total_savings|floatformat:2 }}</p>
+      </div>
+      <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
+        {% for account in accounts %}
+          {% if account.subtype == "savings" %}
+            <li class="flex justify-between items-center">
+              <div>
+                <p class="text-base text-white">{{ account.name }}</p>
+                <p class="text-sm text-textSubtle">•••• {{ account.mask }}</p>
+              </div>
+              <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Right Column (Liabilities) -->
+  <div class="w-1/2 flex flex-col gap-[18px]">
+
+    <!-- Liabilities Summary -->
+    <div class="w-full rounded-xl shadow-xl overflow-hidden">
+      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Liabilities</h3>
+          <p class="text-sm text-red-500">-3.7% <span class="text-textSubtle ml-2">1 month change</span></p>
+        </div>
+        <p class="text-lg font-semibold text-white">${{ total_liabilities|floatformat:2 }}</p>
+      </div>
+    </div>
+
+    <!-- Credit Cards -->
+    <div class="w-full rounded-xl shadow-xl overflow-hidden">
+      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Credit Cards</h3>
+          <p class="text-sm text-red-500">-3.7% <span class="text-textSubtle ml-2">1 month change</span></p>
+        </div>
+        <p class="text-lg font-semibold text-white">${{ total_credit|floatformat:2 }}</p>
+      </div>
+      <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
+        {% for account in accounts %}
+          {% if account.type == "credit" %}
+            <li class="flex justify-between items-center">
+              <div>
+                <p class="text-base text-white">{{ account.name }}</p>
+                <p class="text-sm text-textSubtle">•••• {{ account.mask }}</p>
+              </div>
+              <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+</div>
+{% else %}
+  <p class="text-gray-600">You don’t have any linked accounts yet.</p>
+{% endif %}
 {% endblock %}
