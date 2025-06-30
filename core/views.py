@@ -5,15 +5,25 @@ Handles views for the main app experience after login:
 - Dashboard (summary of linked accounts, transactions, etc.)
 """
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from plaid_link.models import PlaidItem, Account, Transaction
-from .models import Budget
-from django.utils import timezone
+# Standard Library
+from collections import defaultdict
 from datetime import datetime
+
+# Django
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.shortcuts import get_object_or_404
+
+# Third-Party (Plaid models)
+from plaid_link.models import PlaidItem, Account, Transaction
+
+# Local App
+from .models import Budget
+
+# Other
 from decimal import Decimal
+
 
 @login_required
 def dashboard(request):
@@ -47,36 +57,45 @@ def dashboard(request):
 def accounts_view(request):
     accounts = Account.objects.filter(plaid_item__user=request.user)
 
-    # Filters
-    checking_accounts = [a for a in accounts if a.subtype == "checking"]
-    savings_accounts = [a for a in accounts if a.subtype == "savings"]
-    credit_card_accounts = [a for a in accounts if a.type == "credit"]
+    # Separate out depository (asset) accounts
+    asset_accounts = [a for a in accounts if a.type == "depository"]
+
+    # Common subtypes shown separately
+    common_subtypes = ["checking", "savings"]
+
+    # Group common assets
+    common_assets = {
+        subtype: [a for a in asset_accounts if a.subtype == subtype]
+        for subtype in common_subtypes
+    }
+
+    # Remaining assets go in "Other Assets"
+    other_assets = [a for a in asset_accounts if a.subtype not in common_subtypes]
 
     # Totals
-    total_checking = sum(Decimal(a.current_balance) for a in checking_accounts)
-    total_savings = sum(Decimal(a.current_balance) for a in savings_accounts)
+    total_checking = sum(Decimal(a.current_balance) for a in common_assets.get("checking", []))
+    total_savings = sum(Decimal(a.current_balance) for a in common_assets.get("savings", []))
+    total_other = sum(Decimal(a.current_balance) for a in other_assets)
+    total_assets = total_checking + total_savings + total_other
+
+    # Liabilities
+    credit_card_accounts = [a for a in accounts if a.type == "credit"]
     total_credit = sum(Decimal(a.current_balance) for a in credit_card_accounts)
-
-    # Asset/Liability classification
-    asset_accounts = [
-        a for a in accounts if a.type == "depository" and Decimal(a.current_balance) >= 0
-    ]
-    liability_accounts = [
-        a for a in accounts if a.type in ["credit", "loan"] or Decimal(a.current_balance) < 0
-    ]
-
-    total_assets = sum(Decimal(a.current_balance) for a in asset_accounts)
-    total_liabilities = sum(Decimal(a.current_balance) for a in liability_accounts)
+    total_liabilities = total_credit
     net_worth = total_assets + total_liabilities
 
     return render(request, "core/accounts.html", {
         "accounts": accounts,
-        "total_assets": total_assets,
-        "total_liabilities": total_liabilities,
-        "net_worth": net_worth,
+        "common_assets": common_assets,
+        "other_assets": other_assets,
+        "credit_accounts": credit_card_accounts,
         "total_checking": total_checking,
         "total_savings": total_savings,
+        "total_other": total_other,
+        "total_assets": total_assets,
         "total_credit": total_credit,
+        "total_liabilities": total_liabilities,
+        "net_worth": net_worth,
     })
 
 
