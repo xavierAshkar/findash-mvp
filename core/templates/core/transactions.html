@@ -3,13 +3,14 @@
 
 {% block title %}Transactions{% endblock %}
 
+{% block header_class %}h-[132px]{% endblock %}
 
 {% block header %}
-  <div class="flex items-center justify-between w-full">
+  <div class="flex items-center justify-between w-full h-[72px]">
     <h1 class="text-[32px] font-bold">Transactions</h1>
 
-
-    <div class="flex gap-[12px] ">
+    <div class="flex gap-[12px]">
+      <!-- Sync Transactions -->
       <form
         hx-post="{% url 'plaid:fetch_transactions' %}"
         hx-swap="none"
@@ -21,54 +22,72 @@
           type="submit"
           class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-cardHeader border-[2px] border-transparent hover:bg-hoverBg hover:border-cardHeader hover:shadow transition cursor-pointer"
         >
-          Sync Transactions
+          Sync transactions
         </button>
       </form>
+
+      <!-- Add Transaction -->
+      <a
+        href="{% url 'core:add_transaction' %}"
+        class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
+      >
+        + Add transaction
+      </a>
     </div>
+  </div>
+
+  <!-- Toolbar section (60px) -->
+  <div class="flex items-center h-[60px] border-t border-gray-800">
+    <span class="text-sm text-gray-400">[ toolbar goes here ]</span>
   </div>
 {% endblock %}
 
 
 {% block content %}
-  {% if transactions %}
-  <ul class="space-y-4">
-    {% for txn in transactions %}
-      <li class="bg-white shadow rounded p-4">
-        <div class="font-semibold text-lg">{{ txn.name }}</div>
-        <div class="text-sm text-gray-500">
-          {{ txn.date }} • {{ txn.account.name }}
+  {% if grouped_transactions %}
+    <div class="space-y-6">
+      {% for date, txns in grouped_transactions.items %}
+        <div>
+          <h2 class="text-sm font-semibold text-textSubtle uppercase tracking-wide mb-2">
+            {{ date|date:"F j, Y" }}
+          </h2>
+
+          <ul class="space-y-1">
+            {% for txn in txns %}
+              <li class="bg-cardBg rounded px-4 py-3 flex items-center justify-between text-sm text-textMain hover:bg-hoverBg transition">
+                
+                <!-- Transaction Name -->
+                <div class="flex-1 truncate">{{ txn.name }}</div>
+
+                <!-- Tag Form -->
+                <form method="post" action="{% url 'core:tag_transaction' txn.id %}" class="mx-4">
+                  {% csrf_token %}
+                  <input
+                    type="text"
+                    name="tag"
+                    value="{{ txn.user_tag|default:'' }}"
+                    placeholder="tag"
+                    class="bg-[#2A2A2F] border-none text-white px-2 py-[2px] rounded text-xs w-28 focus:outline-none"
+                    onkeydown="if(event.key==='Enter'){ this.form.submit(); }"
+                  />
+                </form>
+
+                <!-- Amount -->
+                <div class="w-[80px] text-right {% if txn.amount > 0 %}text-red-400{% else %}text-green-400{% endif %}">
+                  ${{ txn.amount }}
+                </div>
+
+                <!-- Account Name -->
+                <div class="w-[120px] text-right text-textSubtle ml-4 truncate">
+                  {{ txn.account.name }}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
         </div>
-        <div class="mt-1 text-sm text-blue-400">
-          Category:
-          {% if txn.category_main %}
-            {{ txn.category_main }}
-          {% elif txn.user_tag %}
-            {{ txn.user_tag }}
-          {% else %}
-            Uncategorized
-          {% endif %}
-        </div>
-        <div class="mt-2 font-medium {% if txn.amount > 0 %}text-red-600{% else %}text-green-600{% endif %}">
-          ${{ txn.amount }}
-        </div>
-
-
-        <!-- Add tag form -->
-        <form method="post" action="{% url 'core:tag_transaction' txn.id %}" class="mt-3">
-          {% csrf_token %}
-          <label class="text-sm text-gray-600 block">Tag this transaction:</label>
-          <div class="flex items-center gap-2 mt-1">
-            <input type="text" name="tag" value="{{ txn.user_tag|default:'' }}" placeholder="e.g. groceries" class="border border-gray-300 p-2 rounded w-full bg-white text-black"
-              class="border px-2 py-1 rounded text-sm w-48" />
-            <button type="submit" class="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">Save</button>
-          </div>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p class="text-gray-600">You don’t have any transactions to show.</p>
-{% endif %}
-
-
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-textSubtle">You don’t have any transactions to show.</p>
+  {% endif %}
 {% endblock %}

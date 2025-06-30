@@ -265,12 +265,8 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col shadow-left-lg z-10">
           <!-- Header -->
-          <header class="bg-primaryBg h-[72px] flex items-center justify-between px-[36px]">
-            {% block header %}
-              <h1 class="text-xl font-semibold">
-                Welcome back, {{ request.user.first_name|default:request.user.email }}
-              </h1>
-            {% endblock %}
+          <header class="{% block header_class %}h-[72px]{% endblock %} bg-primaryBg flex flex-col justify-center px-[36px]">
+            {% block header %}{% endblock %}
           </header>
 
           <!-- Body Content -->
