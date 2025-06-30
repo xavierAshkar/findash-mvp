@@ -19,11 +19,13 @@ urlpatterns = [
 
 
     # Transactions view
-    path("transactions/", views.transactions, name="transactions"),
+    path("transactions/", views.transactions_view, name="transactions"),
+
+    # Adding a transaction
+    path("transactions/new/", views.add_transaction_view, name="add_transaction"),
 
     # Tagging a transaction
     path("transactions/tag/<int:transaction_id>/", views.tag_transaction, name="tag_transaction"),
-
 
     # Budgets view
     path('budgets/', views.budgets, name='budgets'),

@@ -23,7 +23,8 @@ from .models import Budget
 
 # Other
 from decimal import Decimal
-
+from itertools import groupby
+from operator import attrgetter
 
 @login_required
 def dashboard(request):
@@ -100,10 +101,47 @@ def accounts_view(request):
 
 
 @login_required
-def transactions(request):
+def transactions_view(request):
     transactions = Transaction.objects.filter(
-        account__plaid_item__user=request.user).order_by("-date")[:50]
-    return render(request, "core/transactions.html", {"transactions": transactions})
+        account__plaid_item__user=request.user
+    ).order_by("-date", "-id")  # Sort by date first
+
+    # Group transactions by date
+    grouped_transactions = {}
+    for date, txns in groupby(transactions, key=attrgetter('date')):
+        grouped_transactions[date] = list(txns)
+
+    return render(request, "core/transactions.html", {
+        "grouped_transactions": grouped_transactions,
+    })
+
+@login_required
+def add_transaction_view(request):
+    accounts = Account.objects.filter(plaid_item__user=request.user)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        amount = request.POST.get("amount")
+        date = request.POST.get("date")
+        category = request.POST.get("category")
+        tag = request.POST.get("tag")
+        account_id = request.POST.get("account")
+
+        if all([name, amount, date, account_id]):
+            account = get_object_or_404(Account, id=account_id, plaid_item__user=request.user)
+            Transaction.objects.create(
+                name=name,
+                amount=Decimal(amount),
+                date=date,
+                category_main=category,
+                user_tag=tag,
+                account=account,
+            )
+            return redirect("core:transactions")
+
+    return render(request, "core/add_transaction.html", {
+        "accounts": accounts
+    })
 
 @require_POST
 @login_required
