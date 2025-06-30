@@ -140,6 +140,7 @@ def exchange_public_token(request):
 # -----------------------------
 # Fetch and Save Accounts
 # -----------------------------
+
 @require_POST
 @login_required
 def fetch_accounts(request):
@@ -154,6 +155,9 @@ def fetch_accounts(request):
     try:
         # Get all PlaidItems for the user
         plaid_items = PlaidItem.objects.filter(user=request.user)
+
+        if not plaid_items.exists():
+            return JsonResponse({"error": "No linked Plaid items"}, status=404)
 
         # Setup Plaid client
         configuration = Configuration(
