@@ -23,6 +23,9 @@
       tailwind.config = {
         theme: {
           extend: {
+            boxShadow: {
+              'card': '0 4px 4px rgba(0, 0, 0, 0.25)',
+            },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
             },
@@ -88,7 +91,7 @@
               <button
                 @click="sidebarOpen = true"
                 x-show="!sidebarOpen"
-                class="absolute inset-0 flex items-center justify-center rounded-full border-[2px] border-transparent hover:border-hoverBorder hover:bg-hoverBg hover:shadow-lg transition cursor-pointer opacity-0 group-hover:opacity-100"
+                class="absolute inset-0 flex items-center justify-center rounded-full border-[2px] border-transparent hover:border-hoverBorder hover:bg-hoverBg hover:shadow-card transition cursor-pointer opacity-0 group-hover:opacity-100"
               >
                 <img
                   src="{% static 'icons/collapse.svg' %}"
@@ -102,7 +105,7 @@
             <div class="flex items-center gap-[6px]" x-show="sidebarOpen">
               <!-- Notifications -->
               <button
-                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition"
+                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition"
               >
                 <img
                   src="{% static 'icons/notifications.svg' %}"
@@ -112,7 +115,7 @@
 
               <!-- Settings -->
               <button
-                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition"
+                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition"
               >
                 <img
                   src="{% static 'icons/settings.svg' %}"
@@ -124,7 +127,7 @@
               <!-- Collapse -->
               <button
                 @click="sidebarOpen = false"
-                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition cursor-pointer"
+                class="p-[6px] rounded-full border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition cursor-pointer"
               >
                 <img
                   src="{% static 'icons/collapse.svg' %}"
@@ -139,7 +142,7 @@
           <nav class="mt-[12px] flex flex-col space-y-[12px] w-full">
             <a
               href="{% url 'core:dashboard' %}"
-              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition {% if request.path == '/dashboard/' %}bg-hoverBg{% endif %}"
             >
               <div
                 class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
@@ -169,7 +172,7 @@
 
             <a
               href="{% url 'core:transactions' %}"
-              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/transactions/' %}bg-hoverBg{% endif %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition {% if request.path == '/transactions/' %}bg-hoverBg{% endif %}"
             >
               <div
                 class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
@@ -199,7 +202,7 @@
 
             <a
               href="{% url 'core:accounts' %}"
-              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/accounts/' %}bg-hoverBg{% endif %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition {% if request.path == '/accounts/' %}bg-hoverBg{% endif %}"
             >
               <div
                 class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
@@ -229,7 +232,7 @@
 
             <a
               href="{% url 'core:budgets' %}"
-              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow transition {% if request.path == '/budgets/' %}bg-hoverBg{% endif %}"
+              class="flex items-center w-full px-[12px] h-[48px] rounded-lg border-[2px] border-transparent hover:bg-hoverBg hover:border-hoverBorder hover:shadow-card transition {% if request.path == '/budgets/' %}bg-hoverBg{% endif %}"
             >
               <div
                 class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0"
@@ -271,17 +274,24 @@
           </header>
 
           <!-- Body Content -->
-          <main class="flex-1 flex flex-col overflow-y-auto px-[24px]">
+          <main class="flex-1 flex flex-col overflow-y-auto px-[24px] pb-[18px]">
+            {% if messages %}
+              <div class="mb-4">
+                {% for message in messages %}
+                  <div class="bg-blue-100 text-blue-800 p-3 rounded mb-2">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
             {% block content %}{% endblock %}
           </main>
         </div>
       </div>
     </div>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        document.body.addEventListener("refreshComplete", function () {
-          location.reload();
-        });
+      document.body.addEventListener("refreshComplete", () => {
+        window.location.reload();
       });
     </script>
   </body>

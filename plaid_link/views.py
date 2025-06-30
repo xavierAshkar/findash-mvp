@@ -37,6 +37,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import PlaidItem, Account, Transaction
 from .utils import encrypt_token, decrypt_token
 
+import traceback
+
 
 
 # --------------------------
@@ -143,13 +145,19 @@ def exchange_public_token(request):
 @login_required
 def fetch_accounts(request):
     """
-    Fetches the user's financial accounts from Plaid
+    Fetches the user's financial accounts from all PlaidItems
     and stores/updates them in the database.
     """
+    from django.conf import settings
+    import traceback
+    print("🔍 DEBUG mode is:", settings.DEBUG)
+
     try:
-        # Get user's PlaidItem
-        plaid_item = PlaidItem.objects.get(user=request.user)
-        access_token = plaid_item.get_access_token()
+        # Get all PlaidItems for the user
+        plaid_items = PlaidItem.objects.filter(user=request.user)
+
+        if not plaid_items.exists():
+            return JsonResponse({"error": "No linked Plaid items"}, status=404)
 
         # Setup Plaid client
         configuration = Configuration(
@@ -161,33 +169,39 @@ def fetch_accounts(request):
         )
         client = plaid_api.PlaidApi(ApiClient(configuration))
 
-        # Call /accounts/get endpoint
-        request_data = AccountsGetRequest(access_token=access_token)
-        response = client.accounts_get(request_data)
-        accounts = response.to_dict()["accounts"]
+        all_accounts = []
 
-        # Save or update accounts in DB
-        for acct in accounts:
-            Account.objects.update_or_create(
-                plaid_item=plaid_item,
-                account_id=acct["account_id"],
-                defaults={
-                    "name": acct["name"],
-                    "official_name": acct.get("official_name"),
-                    "type": acct["type"],
-                    "subtype": acct["subtype"],
-                    "available_balance": acct["balances"].get("available"),
-                    "current_balance": acct["balances"].get("current"),
-                }
-            )
+        for plaid_item in plaid_items:
+            access_token = plaid_item.get_access_token()
 
-        response = JsonResponse({"status": "success", "count": len(accounts)})
+            # Call /accounts/get for this access token
+            request_data = AccountsGetRequest(access_token=access_token)
+            response = client.accounts_get(request_data)
+            accounts = response.to_dict()["accounts"]
+            all_accounts.extend(accounts)
+
+            # Save or update each account
+            for acct in accounts:
+                Account.objects.update_or_create(
+                    plaid_item=plaid_item,
+                    account_id=acct["account_id"],
+                    defaults={
+                        "name": acct["name"],
+                        "official_name": acct.get("official_name"),
+                        "type": acct["type"],
+                        "subtype": acct["subtype"],
+                        "available_balance": acct["balances"].get("available"),
+                        "current_balance": acct["balances"].get("current"),
+                    }
+                )
+
+        response = JsonResponse({"status": "success", "count": len(all_accounts)})
         response["HX-Trigger"] = "refreshComplete"
         return response
 
-    except PlaidItem.DoesNotExist:
-        return JsonResponse({"error": "Plaid item not found."}, status=404)
     except Exception as e:
+        print("🔴 ERROR in fetch_accounts")
+        traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
 
