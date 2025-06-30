@@ -1,0 +1,25 @@
+{% load core_extras %}
+<div class="w-full rounded-xl shadow-card overflow-hidden">
+  <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+    <div>
+      <h3 class="text-lg font-semibold text-white">{{ subtype|title }}</h3>
+      <p class="text-sm text-green-500">
+        +X.X% <span class="text-textSubtle ml-2">1 month change</span>
+      </p>
+    </div>
+    <p class="text-lg font-semibold text-white">
+      ${{ asset_group|sum_balances|floatformat:2 }}
+    </p>
+  </div>
+  <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
+    {% for account in asset_group %}
+      <li class="flex justify-between items-center">
+        <div>
+          <p class="text-base text-white">{{ account.name }}</p>
+          <p class="text-sm text-textSubtle">•••• {{ account.mask }}</p>
+        </div>
+        <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
