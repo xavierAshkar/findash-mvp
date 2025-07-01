@@ -148,10 +148,6 @@ def fetch_accounts(request):
     Fetches the user's financial accounts from all PlaidItems
     and stores/updates them in the database.
     """
-    from django.conf import settings
-    import traceback
-    print("🔍 DEBUG mode is:", settings.DEBUG)
-
     try:
         # Get all PlaidItems for the user
         plaid_items = PlaidItem.objects.filter(user=request.user)
