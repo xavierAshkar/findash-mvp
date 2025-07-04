@@ -6,7 +6,7 @@ Handles views for the main app experience after login:
 """
 
 # Standard Library
-from collections import defaultdict
+from collections import OrderedDict
 from datetime import datetime
 
 # Django
@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 
 # Third-Party (Plaid models)
 from plaid_link.models import PlaidItem, Account, Transaction
@@ -102,17 +103,63 @@ def accounts_view(request):
 
 @login_required
 def transactions_view(request):
-    transactions = Transaction.objects.filter(
-        account__plaid_item__user=request.user
-    ).order_by("-date", "-id")  # Sort by date first
+    print("💡 Total transactions before filters:", Transaction.objects.filter(account__plaid_item__user=request.user).count())
+    user = request.user
+    params = request.GET
 
-    # Group transactions by date
-    grouped_transactions = {}
-    for date, txns in groupby(transactions, key=attrgetter('date')):
-        grouped_transactions[date] = list(txns)
+    # All user accounts
+    user_accounts = Account.objects.filter(plaid_item__user=user)
+
+    # Base queryset
+    transactions = Transaction.objects.filter(account__plaid_item__user=user)
+
+    # Account filter
+    selected_id = params.get("account_id")
+    if selected_id:
+        transactions = transactions.filter(account__id=selected_id)
+
+    # Date range filter
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
+    if start_date:
+        transactions = transactions.filter(date__gte=start_date)
+    if end_date:
+        transactions = transactions.filter(date__lte=end_date)
+
+    # Amount filter
+    min_amount = params.get("min_amount")
+    max_amount = params.get("max_amount")
+    if min_amount:
+        transactions = transactions.filter(amount__gte=Decimal(min_amount))
+    if max_amount:
+        transactions = transactions.filter(amount__lte=Decimal(max_amount))
+
+    # Tag or category filter
+    tag = params.get("tag")
+    if tag:
+        transactions = transactions.filter(
+            Q(user_tag__icontains=tag) | Q(category_main__icontains=tag)
+        )
+
+    # Sort and group
+    transactions = transactions.order_by("-date", "-id")
+    print("🧾 First 5 transactions:", list(transactions[:5]))
+    grouped_transactions = OrderedDict()
+
+    for txn in transactions:
+        grouped_transactions.setdefault(txn.date, []).append(txn)
 
     return render(request, "core/transactions.html", {
         "grouped_transactions": grouped_transactions,
+        "user_accounts": user_accounts,
+        "selected_account_id": int(selected_id) if selected_id else None,
+        "filters": {
+            "tag": tag,
+            "start_date": start_date,
+            "end_date": end_date,
+            "min_amount": min_amount,
+            "max_amount": max_amount,
+        }
     })
 
 @login_required

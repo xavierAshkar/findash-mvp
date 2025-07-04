@@ -11,6 +11,27 @@
     <!-- Load Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      /* Show scrollbar only while scrolling (WebKit only) */
+      .scrollbar-auto {
+        scrollbar-width: auto; /* Firefox */
+      }
+
+      .scrollbar-auto::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .scrollbar-auto::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+      }
+
+      .scrollbar-auto::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .scrollbar-auto {
+        scrollbar-gutter: stable;
+      }
       .shadow-left-lg {
         box-shadow: -6px 0 12px -6px rgba(0, 0, 0, 0.25);
       }
@@ -262,15 +283,19 @@
           </nav>
         </aside>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col shadow-left-lg z-10">
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col shadow-left-lg z-10 overflow-y-auto scrollbar-auto">
           <!-- Header -->
-          <header class="{% block header_class %}h-[72px]{% endblock %} bg-primaryBg flex flex-col justify-center px-[36px]">
+          <header class="sticky top-0 h-[72px] bg-primaryBg flex items-center justify-between px-[36px]">
             {% block header %}{% endblock %}
           </header>
 
-          <!-- Body Content -->
-          <main class="flex-1 flex flex-col overflow-y-auto px-[24px] pb-[18px]">
+          <!-- Toolbar -->
+          {% block toolbar %}
+          {% endblock %}
+
+          <!-- Main -->
+          <main class="flex-1 flex flex-col px-[24px] mb-[12px]">
             {% if messages %}
               <div class="mb-4">
                 {% for message in messages %}
@@ -286,8 +311,11 @@
       </div>
     </div>
     <script>
-      document.body.addEventListener("refreshComplete", () => {
-        window.location.reload();
+      document.body.addEventListener("htmx:afterOnLoad", function (event) {
+        const trigger = event.detail?.xhr?.getResponseHeader("HX-Trigger");
+        if (trigger === "refreshComplete") {
+          window.location.reload();
+        }
       });
     </script>
   </body>

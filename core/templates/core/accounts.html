@@ -1,5 +1,4 @@
 {% extends "base_app.html" %}
-{% load core_extras %}
 
 {% block title %}Accounts{% endblock %}
 
@@ -9,21 +8,21 @@
 
     <div class="flex gap-[12px] ">
       <form
-        hx-post="{% url 'plaid:fetch_accounts' %}"
+        hx-post="{% url 'plaid:sync_all' %}"
         hx-swap="none"
         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
       >
         <button
           type="submit"
-          class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-cardHeader border-[2px] border-transparent hover:bg-hoverBg hover:border-cardHeader hover:shadow transition cursor-pointer"
+          class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md hover:bg-cardHeader hover:shadow-card active:bg-hoverBg transition cursor-pointer"
         >
-          Sync accounts
+          Refresh all
         </button>
       </form>
 
       <a
         href="{% url 'plaid:link_account' %}"
-        class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
+        class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
       >
         + Add account
       </a>
