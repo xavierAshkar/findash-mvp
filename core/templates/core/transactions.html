@@ -1,47 +1,69 @@
 {% extends "base_app.html" %}
 
-
 {% block title %}Transactions{% endblock %}
-
-{% block header_class %}h-[132px]{% endblock %}
 
 {% block header %}
   <div class="flex items-center justify-between w-full h-[72px]">
     <h1 class="text-[32px] font-bold">Transactions</h1>
 
     <div class="flex gap-[12px]">
-      <!-- Sync Transactions -->
-      <form
-        hx-post="{% url 'plaid:fetch_transactions' %}"
-        hx-swap="none"
-        hx-trigger="click"
-        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-        hx-on="htmx:afterOnLoad: window.location.reload()"
-      >
-        <button
-          type="submit"
-          class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-cardHeader border-[2px] border-transparent hover:bg-hoverBg hover:border-cardHeader hover:shadow transition cursor-pointer"
-        >
-          Sync transactions
-        </button>
-      </form>
-
       <!-- Add Transaction -->
       <a
         href="{% url 'core:add_transaction' %}"
-        class="text-[16px] px-[12px] py-[6px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
+        class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
       >
         + Add transaction
       </a>
     </div>
   </div>
-
-  <!-- Toolbar section (60px) -->
-  <div class="flex items-center h-[60px] border-t border-gray-800">
-    <span class="text-sm text-gray-400">[ toolbar goes here ]</span>
-  </div>
 {% endblock %}
 
+{% block toolbar %}
+<div class="sticky top-[72px] px-[24px] z-20 bg-primaryBg">
+  <div class="h-[60px] bg-cardHeader rounded-xl shadow-card flex items-center justify-center">
+    <form method="get" class="flex flex-wrap gap-3 items-center text-sm text-white">
+      <select name="account_id" onchange="this.form.submit()" class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm">
+        <option value="">All accounts</option>
+        {% for account in user_accounts %}
+          <option value="{{ account.id }}" {% if selected_account_id == account.id %}selected{% endif %}>
+            {{ account.name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <input type="text" name="tag" placeholder="Tag or Category"
+            value="{{ filters.tag|default:'' }}"
+            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm" />
+
+      <input type="date" name="start_date"
+            value="{{ filters.start_date|default:'' }}"
+            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm" />
+
+      <input type="date" name="end_date"
+            value="{{ filters.end_date|default:'' }}"
+            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm" />
+
+      <input type="number" step="0.01" name="min_amount" placeholder="Min $"
+            value="{{ filters.min_amount|default:'' }}"
+            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm w-[80px]" />
+
+      <input type="number" step="0.01" name="max_amount" placeholder="Max $"
+            value="{{ filters.max_amount|default:'' }}"
+            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm w-[80px]" />
+
+      <button type="submit" class="px-3 py-1 bg-accent text-white rounded hover:bg-opacity-80 transition">
+        Filter
+      </button>
+
+      <a href="{% url 'core:transactions' %}"
+        class="px-3 py-1 bg-hoverBg text-white rounded hover:bg-opacity-70 transition border border-cardHeader">
+        Clear
+      </a>
+    </form>
+  </div>
+  <div class="h-[12px]"></div>
+</div>
+{% endblock %}
 
 {% block content %}
   {% if grouped_transactions %}

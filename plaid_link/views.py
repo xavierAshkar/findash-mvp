@@ -210,16 +210,13 @@ def fetch_accounts(request):
 @login_required
 def fetch_transactions(request):
     """
-    Fetches transactions from Plaid and stores them in the database.
+    Fetches transactions from Plaid for all PlaidItems and stores them in the database.
     """
     try:
-        from .models import Transaction  # If not imported at top
+        plaid_items = PlaidItem.objects.filter(user=request.user)
+        if not plaid_items.exists():
+            return JsonResponse({"error": "No linked Plaid items"}, status=404)
 
-        # Get user's PlaidItem and access token
-        plaid_item = PlaidItem.objects.get(user=request.user)
-        access_token = plaid_item.get_access_token()
-
-        # Setup Plaid client
         configuration = Configuration(
             host="https://sandbox.plaid.com",
             api_key={
@@ -229,47 +226,70 @@ def fetch_transactions(request):
         )
         client = plaid_api.PlaidApi(ApiClient(configuration))
 
-        # Date range for the last 30 days
         end_date = date.today()
         start_date = end_date - timedelta(days=30)
 
-        # Fetch transactions
-        request_data = TransactionsGetRequest(
-            access_token=access_token,
-            start_date=start_date,
-            end_date=end_date
-        )
-        response = client.transactions_get(request_data)
-        transactions = response.to_dict()["transactions"]
-
-        # Build map of Plaid account IDs to Account objects
-        account_map = {
-            acct.account_id: acct
-            for acct in Account.objects.filter(plaid_item=plaid_item)
-        }
-
-        # Store transactions in DB
         created_count = 0
-        for txn in transactions:
-            Transaction.objects.update_or_create(
-                transaction_id=txn["transaction_id"],
-                defaults={
-                    "account": account_map[txn["account_id"]],
-                    "name": txn["name"],
-                    "amount": txn["amount"],
-                    "date": txn["date"],
-                    "category_main": txn["category"][0] if txn.get("category") else None,
-                    "category_detailed": txn["category"][1] if txn.get("category") and len(txn["category"]) > 1 else None,
-                    "merchant_name": txn.get("merchant_name"),
-                    "payment_channel": txn.get("payment_channel"),
-                }
+
+        for plaid_item in plaid_items:
+            access_token = plaid_item.get_access_token()
+
+            request_data = TransactionsGetRequest(
+                access_token=access_token,
+                start_date=start_date,
+                end_date=end_date
             )
-            created_count += 1
+            response = client.transactions_get(request_data)
+            transactions = response.to_dict()["transactions"]
+
+            account_map = {
+                acct.account_id: acct
+                for acct in Account.objects.filter(plaid_item=plaid_item)
+            }
+
+            for txn in transactions:
+                Transaction.objects.update_or_create(
+                    transaction_id=txn["transaction_id"],
+                    defaults={
+                        "account": account_map.get(txn["account_id"]),
+                        "name": txn["name"],
+                        "amount": txn["amount"],
+                        "date": txn["date"],
+                        "category_main": txn["category"][0] if txn.get("category") else None,
+                        "category_detailed": txn["category"][1] if txn.get("category") and len(txn["category"]) > 1 else None,
+                        "merchant_name": txn.get("merchant_name"),
+                        "payment_channel": txn.get("payment_channel"),
+                    }
+                )
+                created_count += 1
 
         return JsonResponse({"status": "success", "count": created_count})
 
     except Exception as e:
+        print("🔴 ERROR in fetch_transactions")
+        traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
+
+
+
+# -----------------------------
+# Sync All Accounts and Transactions
+# -----------------------------
+
+@require_POST
+@login_required
+def sync_all(request):
+    try:
+        fetch_accounts(request)
+        fetch_transactions(request)
+        response = JsonResponse({"status": "success"})
+        response["HX-Trigger"] = "refreshComplete"  # 👈 this is the key
+        return response
+    except Exception as e:
+        print("🔴 ERROR in sync_all")
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 
 # -----------------------------
