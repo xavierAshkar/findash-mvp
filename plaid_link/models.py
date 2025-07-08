@@ -1,7 +1,8 @@
-# Create your Django models here.
+# plaid_link/models.py
 from django.db import models
 from django.conf import settings
-from .utils import encrypt_token, decrypt_token  # coming next
+from .utils import encrypt_token, decrypt_token
+from core.models import Tag
 
 class PlaidItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -41,7 +42,7 @@ class Transaction(models.Model):
     date = models.DateField()
     category_main = models.CharField(max_length=100, null=True, blank=True)
     category_detailed = models.CharField(max_length=200, null=True, blank=True)
-    user_tag = models.CharField(max_length=100, null=True, blank=True)
+    user_tag = models.ForeignKey(Tag, null=True, blank=True, on_delete=models.SET_NULL)
     merchant_name = models.CharField(max_length=200, null=True, blank=True)
     payment_channel = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -43,7 +43,12 @@
 
     <div>
       <label class="block text-sm text-textSubtle mb-1">Tag (optional)</label>
-      <input type="text" name="tag" class="w-full rounded px-3 py-2 bg-cardHeader text-white border border-gray-600" />
+      <select name="tag" class="w-full rounded px-3 py-2 bg-cardHeader text-white border border-gray-600">
+        <option value="">—</option>
+        {% for tag in user_tags %}
+          <option value="{{ tag.id }}">{{ tag.name }}</option>
+        {% endfor %}
+      </select>
     </div>
 
     <button type="submit" class="mt-4 bg-accent text-white font-semibold px-4 py-2 rounded hover:bg-opacity-80 transition">

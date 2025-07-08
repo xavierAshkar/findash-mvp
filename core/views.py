@@ -20,7 +20,7 @@ from django.db.models import Q
 from plaid_link.models import PlaidItem, Account, Transaction
 
 # Local App
-from .models import Budget
+from .models import Budget, Tag
 
 # Other
 from decimal import Decimal
@@ -36,11 +36,8 @@ def dashboard(request):
     - Otherwise, fetch accounts and render them in the dashboard template
     """
 
-    # Check if user has any Plaid items linked
+    # Check if user has any Plaid items linked (for future use on ux)
     has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
-    if not has_plaid_item:
-        # Redirect user to the account link flow if nothing is connected
-        return redirect('plaid:link_account')
 
     # Fetch all accounts linked via Plaid for this user
     accounts = Account.objects.filter(plaid_item__user=request.user)
@@ -103,9 +100,16 @@ def accounts_view(request):
 
 @login_required
 def transactions_view(request):
-    print("💡 Total transactions before filters:", Transaction.objects.filter(account__plaid_item__user=request.user).count())
     user = request.user
     params = request.GET
+
+    transactions = Transaction.objects.filter(account__plaid_item__user=user)
+
+    # 🔍 DEBUG: Print all transactions and their tags
+    print("🔎 All transactions and tags:")
+    for txn in transactions:
+        print(f"  • {txn.name} → tag: {txn.user_tag.name if txn.user_tag else 'None'}")
+
 
     # All user accounts
     user_accounts = Account.objects.filter(plaid_item__user=user)
@@ -138,20 +142,22 @@ def transactions_view(request):
     tag = params.get("tag")
     if tag:
         transactions = transactions.filter(
-            Q(user_tag__icontains=tag) | Q(category_main__icontains=tag)
+            Q(user_tag__name__icontains=tag) | Q(category_main__icontains=tag)
         )
 
     # Sort and group
     transactions = transactions.order_by("-date", "-id")
-    print("🧾 First 5 transactions:", list(transactions[:5]))
     grouped_transactions = OrderedDict()
 
     for txn in transactions:
         grouped_transactions.setdefault(txn.date, []).append(txn)
 
+    user_tags = Tag.objects.filter(user=request.user)
+
     return render(request, "core/transactions.html", {
         "grouped_transactions": grouped_transactions,
         "user_accounts": user_accounts,
+        "user_tags": user_tags,
         "selected_account_id": int(selected_id) if selected_id else None,
         "filters": {
             "tag": tag,
@@ -164,14 +170,17 @@ def transactions_view(request):
 
 @login_required
 def add_transaction_view(request):
+    user = request.user
     accounts = Account.objects.filter(plaid_item__user=request.user)
+    user_tags = Tag.objects.filter(user=user)
 
     if request.method == "POST":
         name = request.POST.get("name")
         amount = request.POST.get("amount")
         date = request.POST.get("date")
         category = request.POST.get("category")
-        tag = request.POST.get("tag")
+        tag_id = request.POST.get("tag")
+        tag = Tag.objects.filter(id=tag_id, user=request.user).first()
         account_id = request.POST.get("account")
 
         if all([name, amount, date, account_id]):
@@ -187,62 +196,94 @@ def add_transaction_view(request):
             return redirect("core:transactions")
 
     return render(request, "core/add_transaction.html", {
-        "accounts": accounts
+        "accounts": accounts,
+        "user_tags": user_tags,
     })
 
 @require_POST
 @login_required
 def tag_transaction(request, transaction_id):
     txn = get_object_or_404(Transaction, id=transaction_id, account__plaid_item__user=request.user)
-    tag = request.POST.get("tag", "").strip()
+    tag_id = request.POST.get("tag", "").strip()
+
+    if tag_id == "":
+        print(f"🧹 Clearing tag for transaction: {txn.name}")
+        txn.user_tag = None
+        txn.save()
+        return redirect(request.META.get("HTTP_REFERER", "core:transactions"))
+
+    tag = Tag.objects.filter(id=tag_id, user=request.user).first()
     if tag:
         txn.user_tag = tag
         txn.save()
-    return redirect("core:transactions")
+        print(f"✅ Tagged transaction: {txn.name} → {tag.name}")
+    else:
+        print(f"⚠️ Tag ID {tag_id} not found for user {request.user}")
+
+    return redirect(request.META.get("HTTP_REFERER", "core:transactions"))
 
 @login_required
 def budgets(request):
+    user = request.user
+
     if request.method == "POST":
         name = request.POST.get("name")
-        categories = request.POST.getlist("categories")  # multiple categories
+        tag_ids = request.POST.getlist("tags")
         amount = request.POST.get("amount")
 
-        Budget.objects.create(
-            user=request.user,
+        budget = Budget.objects.create(
+            user=user,
             name=name,
-            categories=categories,
-            amount=amount
+            amount=amount,
         )
+        budget.tags.set(tag_ids)
         return redirect('core:budgets')
 
-    budgets = Budget.objects.filter(user=request.user)
+    budgets = Budget.objects.filter(user=user)
     now = timezone.now()
     month_start = datetime(now.year, now.month, 1)
 
-    # Gather transactions from this month
     transactions = Transaction.objects.filter(
-        account__plaid_item__user=request.user,
+        account__plaid_item__user=user,
         date__gte=month_start
     )
 
-    # Match against budgets
     budget_data = []
     for budget in budgets:
-        total_spent = sum(
-            t.amount
-            for t in transactions
-            if (
-                (t.user_tag and any(cat.lower() in t.user_tag.lower() for cat in budget.categories)) or
-                (not t.user_tag and t.category_main and any(cat.lower() in t.category_main.lower() for cat in budget.categories))
-            )
-        )
+        matching_tags = budget.tags.all()
+        tag_ids = {tag.id for tag in matching_tags}
+
+        total_spent = 0
+        included_txns = []
+
+        for t in transactions:
+            if t.user_tag and t.user_tag.id in tag_ids:
+                total_spent += t.amount
+                included_txns.append(t)
+
+
+        percent = float(total_spent) / float(budget.amount) if budget.amount else 0
+
+        if percent >= 1.0:
+            color = "#ef4444"  # red
+        elif percent >= 0.75:
+            color = "#facc15"  # yellow
+        else:
+            color = "#4ade80"  # green
+
         budget_data.append({
             "name": budget.name,
             "amount": budget.amount,
             "spent": total_spent,
-            "categories": budget.categories,
+            "tags": matching_tags,
+            "transactions": included_txns,
+            "percent": percent * 100,
+            "color": color,
         })
 
+    user_tags = Tag.objects.filter(user=user)
+
     return render(request, 'core/budgets.html', {
-        "budget_data": budget_data
+        "budget_data": budget_data,
+        "user_tags": user_tags,
     })
