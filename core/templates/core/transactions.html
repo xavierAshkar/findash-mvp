@@ -3,7 +3,7 @@
 {% block title %}Transactions{% endblock %}
 
 {% block header %}
-  <div class="flex items-center justify-between w-full h-[72px]">
+  <div class="min-h-[72px] h-full w-full flex items-center justify-between">
     <h1 class="text-[32px] font-bold">Transactions</h1>
 
     <div class="flex gap-[12px]">
@@ -84,14 +84,16 @@
                 <!-- Tag Form -->
                 <form method="post" action="{% url 'core:tag_transaction' txn.id %}" class="mx-4">
                   {% csrf_token %}
-                  <input
-                    type="text"
-                    name="tag"
-                    value="{{ txn.user_tag|default:'' }}"
-                    placeholder="tag"
-                    class="bg-[#2A2A2F] border-none text-white px-2 py-[2px] rounded text-xs w-28 focus:outline-none"
-                    onkeydown="if(event.key==='Enter'){ this.form.submit(); }"
-                  />
+                  <select name="tag" class="bg-[#2A2A2F] border-none text-white px-2 py-[2px] rounded text-xs w-28"
+                          onchange="this.form.submit()">
+                    <option value="">—</option>
+                    {% for tag in user_tags %}
+                      <option value="{{ tag.id }}" {% if txn.user_tag and tag.id == txn.user_tag.id %}selected{% endif %}>
+                        {{ tag.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+          
                 </form>
 
                 <!-- Amount -->

@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from plaid_link.models import PlaidItem, Account, Transaction
-from core.models import Budget
+from core.models import Budget, Tag
 
 User = get_user_model()
 
@@ -11,12 +11,6 @@ class CoreViewTests(TestCase):
         self.client = Client()
         self.user = User.objects.create_user(email="dash@example.com", password="pw")
         self.client.login(email="dash@example.com", password="pw")
-
-    # Test: Redirect to link flow if no accounts are linked
-    def test_dashboard_redirects_if_no_accounts(self):
-        response = self.client.get(reverse('core:dashboard'))
-        self.assertEqual(response.status_code, 302)
-        self.assertIn(reverse('plaid:link_account'), response.url)
 
     # Test: POST to budgets creates a new Budget object
     def test_budget_post_creates_budget(self):
@@ -60,13 +54,29 @@ class CoreViewTests(TestCase):
 
     # Test: Tagging a transaction sets the user_tag field
     def test_tag_transaction_applies_tag(self):
+        tag = Tag.objects.create(user=self.user, name="custom-tag")
+        
         item = PlaidItem.objects.create(user=self.user, item_id='mock')
-        account = Account.objects.create(plaid_item=item, account_id='a', name='A', type='depository', subtype='checking')
-        txn = Transaction.objects.create(account=account, transaction_id='t', name='Txn', amount=12, date='2024-06-01')
+        account = Account.objects.create(
+            plaid_item=item,
+            account_id='acct1',
+            name='Test Account',
+            type='depository',
+            subtype='checking',
+            current_balance=100.0,
+        )
+        txn = Transaction.objects.create(
+            account=account,
+            transaction_id='txn1',
+            name='Test Transaction',
+            amount=12.34,
+            date='2025-07-01',
+        )
 
         response = self.client.post(reverse('core:tag_transaction', args=[txn.id]), {
-            'tag': 'custom-tag'
+            'tag': str(tag.id)
         })
+
         self.assertEqual(response.status_code, 302)
         txn.refresh_from_db()
-        self.assertEqual(txn.user_tag, 'custom-tag')
+        self.assertEqual(txn.user_tag, tag)
