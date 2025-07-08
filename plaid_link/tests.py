@@ -35,7 +35,8 @@ class PlaidViewsTests(TestCase):
     # Test: Fetch transactions fails gracefully without a PlaidItem
     def test_fetch_transactions_requires_plaiditem(self):
         response = self.client.post(reverse('plaid:fetch_transactions'))
-        self.assertEqual(response.status_code, 500)  # error handled gracefully
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("No linked Plaid items", response.json().get("error", ""))
 
     # Test: Mock token exchange and assert PlaidItem is saved
     @patch("plaid_link.views.plaid_api.PlaidApi.item_public_token_exchange")
