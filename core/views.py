@@ -105,12 +105,6 @@ def transactions_view(request):
 
     transactions = Transaction.objects.filter(account__plaid_item__user=user)
 
-    # 🔍 DEBUG: Print all transactions and their tags
-    print("🔎 All transactions and tags:")
-    for txn in transactions:
-        print(f"  • {txn.name} → tag: {txn.user_tag.name if txn.user_tag else 'None'}")
-
-
     # All user accounts
     user_accounts = Account.objects.filter(plaid_item__user=user)
 
