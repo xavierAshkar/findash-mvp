@@ -10,7 +10,4 @@ urlpatterns = [
 
     # Login view (Django built-in)
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-
-    # Logout view (Django built-in)
-    path("logout/", views.logout_view, name="logout"),
 ]

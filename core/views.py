@@ -11,6 +11,7 @@ from datetime import datetime
 
 # Django
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -281,3 +282,20 @@ def budgets(request):
         "budget_data": budget_data,
         "user_tags": user_tags,
     })
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect("users:login")
+
+@require_POST
+@login_required
+def delete_account_view(request):
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect("users:register")
+
+@login_required
+def profile_view(request):
+    return render(request, "core/profile.html")

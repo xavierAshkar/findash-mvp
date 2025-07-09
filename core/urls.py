@@ -29,4 +29,11 @@ urlpatterns = [
 
     # Budgets view
     path('budgets/', views.budgets, name='budgets'),
+
+    # Django built-in logout view
+    path("logout/", views.logout_view, name="logout"),
+    
+    # Profile + Account Management
+    path("profile/", views.profile_view, name="profile"),
+    path("delete-account/", views.delete_account_view, name="delete_account"),
 ]
