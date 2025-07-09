@@ -36,7 +36,7 @@ class Account(models.Model):
     
 class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    transaction_id = models.CharField(max_length=100, unique=True)  # from Plaid
+    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)  # from Plaid
     name = models.CharField(max_length=200)
     amount = models.FloatField()
     date = models.DateField()
