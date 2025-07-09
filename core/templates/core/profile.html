@@ -1,0 +1,34 @@
+{% extends "base_app.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block header %}
+  <div class="flex items-center justify-between w-full h-[72px]">
+    <h1 class="text-[32px] font-bold">Profile</h1>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-xl space-y-6">
+    <div class="bg-cardHeader p-6 rounded-lg border border-gray-700">
+      <h2 class="text-white font-semibold text-lg mb-2">User Info</h2>
+      <p class="text-textSubtle">Email: {{ request.user.email }}</p>
+    </div>
+
+    <div class="flex gap-4">
+      <form method="POST" action="{% url 'core:logout' %}">
+        {% csrf_token %}
+        <button class="bg-accent px-4 py-2 rounded text-white font-semibold hover:bg-opacity-80">
+          Log Out
+        </button>
+      </form>
+
+      <form method="POST" action="{% url 'core:delete_account' %}" onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.')">
+        {% csrf_token %}
+        <button class="bg-red-600 px-4 py-2 rounded text-white font-semibold hover:bg-opacity-80">
+          Delete Account
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
