@@ -9,7 +9,7 @@ class UserAuthTests(TestCase):
         self.client = Client()
         self.register_url = reverse('users:register')
         self.login_url = reverse('users:login')
-        self.logout_url = reverse('users:logout')
+        self.logout_url = reverse('core:logout')
         self.home_url = reverse('home')
 
     # Test: Ensure homepage is publicly accessible
