@@ -45,7 +45,3 @@ def register(request):
 
     # Render the registration template with the form (either blank or with errors)
     return render(request, "registration/register.html", {"form": form})
-
-def logout_view(request):
-    logout(request)
-    return redirect("users:login")

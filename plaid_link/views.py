@@ -66,10 +66,7 @@ def create_link_token(request):
         user=user,
         client_name="Findash MVP",
         products=[
-            Products("auth"),
             Products("transactions"),
-            Products("investments"),
-            Products("liabilities"),
         ],
         country_codes=[CountryCode("US")],
         language='en',
