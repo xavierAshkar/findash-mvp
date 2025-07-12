@@ -25,9 +25,9 @@ jobs:
 
     env:
       DJANGO_SECRET_KEY: testkey
-      PLAID_CLIENT_ID: fake
-      PLAID_SECRET: fake
-      FERNET_KEY: oi7xAdhnSEw7ckOs6py3nxChgI1pBU0PCWYVxB8LT8Q=
+      PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+      PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
+      FERNET_KEY: ${{ secrets.FERNET_KEY }}
       DB_NAME: test_db
       DB_USER: postgres
       DB_PASSWORD: postgres
