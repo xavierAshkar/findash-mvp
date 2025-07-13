@@ -1,4 +1,10 @@
-# Register your models here.
+"""
+users/admin.py
+
+Handles the admin interface for user management.
+- Custom user admin configuration
+"""
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
