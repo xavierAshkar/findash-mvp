@@ -1,3 +1,12 @@
+"""
+users/tests.py
+
+Test suite for the Users application.
+- User registration
+- User login/logout
+- Home page access
+"""
+
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
