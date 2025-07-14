@@ -79,4 +79,4 @@ class CoreViewTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         txn.refresh_from_db()
-        self.assertEqual(txn.user_tag, tag)
+        self.assertEqual(txn.tag, tag)

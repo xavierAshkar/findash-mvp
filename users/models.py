@@ -1,9 +1,8 @@
 """
 users/models.py
 
-Handles URL routing for user-related views such as:
-- User manager for creating users and superusers
-- Custom user model with email as the unique identifier
+Defines custom user model for the application.
+This model extends Django's AbstractBaseUser and PermissionsMixin to create a user model
 """
 
 from django.db import models
