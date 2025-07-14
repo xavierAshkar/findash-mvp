@@ -57,6 +57,7 @@ class UserAuthTests(TestCase):
     def test_logout_redirects_to_login(self):
         user = User.objects.create_user(email='logout@test.com', full_name='Bye', password='bye12345')
         self.client.login(username='logout@test.com', password='bye12345')
-        response = self.client.get(self.logout_url)
+        response = self.client.post(self.logout_url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, self.login_url)
+
