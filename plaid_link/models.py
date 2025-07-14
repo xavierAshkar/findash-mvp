@@ -1,8 +1,8 @@
 """
 plaid_link/models.py
 
-This module defines the database models for Plaid integration, including PlaidItem, Account, and Transaction.
-These models are used to store user financial data securely and efficiently.
+Defines models for the Plaid integration, including PlaidItem, Account, and Transaction.
+These models are used to store and manage financial data linked through Plaid.
 """
 
 from decimal import Decimal
