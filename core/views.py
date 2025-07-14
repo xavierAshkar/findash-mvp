@@ -203,13 +203,13 @@ def tag_transaction(request, transaction_id):
 
     if tag_id == "":
         print(f"🧹 Clearing tag for transaction: {txn.name}")
-        txn.user_tag = None
+        txn.tag = None
         txn.save()
         return redirect(request.META.get("HTTP_REFERER", "core:transactions"))
 
     tag = Tag.objects.filter(id=tag_id, user=request.user).first()
     if tag:
-        txn.user_tag = tag
+        txn.tag = tag
         txn.save()
         print(f"✅ Tagged transaction: {txn.name} → {tag.name}")
     else:

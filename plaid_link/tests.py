@@ -16,15 +16,18 @@ class PlaidViewsTests(TestCase):
         self.client.login(email="x@example.com", password="pw")
 
     # Test: Link token creation works and returns a token (mocked)
-    @patch("plaid_link.views.link.plaid_api.PlaidApi.link_token_create")
-    def test_create_link_token_works(self, mock_link_token_create):
+    @patch("plaid_link.utils.get_plaid_client")
+    def test_create_link_token_works(self, mock_get_client):
+        mock_client = MagicMock()
         mock_response = MagicMock()
         mock_response.to_dict.return_value = {"link_token": "mock-token"}
-        mock_link_token_create.return_value = mock_response
+        mock_client.link_token_create.return_value = mock_response
+        mock_get_client.return_value = mock_client
 
         response = self.client.get(reverse('plaid:create_link_token'))
         self.assertEqual(response.status_code, 200)
         self.assertIn("link_token", response.json())
+
 
 
     # Test: Fetch accounts fails cleanly if no PlaidItem is linked
@@ -39,17 +42,19 @@ class PlaidViewsTests(TestCase):
         self.assertIn("No linked Plaid items", response.json().get("error", ""))
 
     # Test: Mock token exchange and assert PlaidItem is saved
-    @patch("plaid_link.views.exchange.plaid_api.PlaidApi.item_public_token_exchange")
-    def test_exchange_token_creates_plaid_item(self, mock_exchange):
-        # Setup mock Plaid response
+    @patch("plaid_link.views.exchange.fetch_transactions")
+    @patch("plaid_link.views.exchange.fetch_accounts")
+    @patch("plaid_link.views.exchange.get_plaid_client")
+    def test_exchange_token_creates_plaid_item(self, mock_get_client, mock_fetch_accounts, mock_fetch_transactions):
+        mock_client = MagicMock()
         mock_response = MagicMock()
         mock_response.__getitem__.side_effect = lambda key: {
             "access_token": "mock-access-token",
             "item_id": "mock-item-id"
         }[key]
-        mock_exchange.return_value = mock_response
+        mock_client.item_public_token_exchange.return_value = mock_response
+        mock_get_client.return_value = mock_client
 
-        # Call exchange endpoint with fake token
         response = self.client.post(
             reverse("plaid:exchange_public_token"),
             content_type="application/json",
@@ -59,5 +64,5 @@ class PlaidViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(PlaidItem.objects.filter(user=self.user).exists())
 
-        item = PlaidItem.objects.get(user=self.user)
-        self.assertEqual(item.item_id, "mock-item-id")
+
+

@@ -55,5 +55,5 @@ def exchange_public_token(request):
         return JsonResponse({"status": "success"})
 
     except Exception as e:
-        # Return an error response if something goes wrong
+        # Handle any exceptions and return an error response
         return JsonResponse({"error": str(e)}, status=400)
