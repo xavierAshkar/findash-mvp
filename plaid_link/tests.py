@@ -16,7 +16,7 @@ class PlaidViewsTests(TestCase):
         self.client.login(email="x@example.com", password="pw")
 
     # Test: Link token creation works and returns a token (mocked)
-    @patch("plaid_link.views.plaid_api.PlaidApi.link_token_create")
+    @patch("plaid_link.views.link.plaid_api.PlaidApi.link_token_create")
     def test_create_link_token_works(self, mock_link_token_create):
         mock_response = MagicMock()
         mock_response.to_dict.return_value = {"link_token": "mock-token"}
@@ -39,7 +39,7 @@ class PlaidViewsTests(TestCase):
         self.assertIn("No linked Plaid items", response.json().get("error", ""))
 
     # Test: Mock token exchange and assert PlaidItem is saved
-    @patch("plaid_link.views.plaid_api.PlaidApi.item_public_token_exchange")
+    @patch("plaid_link.views.exchange.plaid_api.PlaidApi.item_public_token_exchange")
     def test_exchange_token_creates_plaid_item(self, mock_exchange):
         # Setup mock Plaid response
         mock_response = MagicMock()
