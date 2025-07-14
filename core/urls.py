@@ -17,7 +17,6 @@ urlpatterns = [
     # Accounts view
     path("accounts/", views.accounts_view, name="accounts"),
 
-
     # Transactions view
     path("transactions/", views.transactions_view, name="transactions"),
 

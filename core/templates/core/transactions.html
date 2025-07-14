@@ -88,7 +88,7 @@
                           onchange="this.form.submit()">
                     <option value="">—</option>
                     {% for tag in user_tags %}
-                      <option value="{{ tag.id }}" {% if txn.user_tag and tag.id == txn.user_tag.id %}selected{% endif %}>
+                      <option value="{{ tag.id }}" {% if txn.tag and tag.id == txn.tag.id %}selected{% endif %}>
                         {{ tag.name }}
                       </option>
                     {% endfor %}
