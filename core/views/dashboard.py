@@ -7,28 +7,45 @@ Handles:
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from plaid_link.models import PlaidItem, Account
+from core.models import DashboardWidget
 
 @login_required
 def dashboard(request):
-    """
-    Display the user's main dashboard view.
-    - If no Plaid accounts are linked, link to the Plaid link page
-    - Otherwise, fetch accounts and render them in the dashboard template
-    """
+    user = request.user
 
-    # Check if user has any Plaid items linked (for future use on ux)
-    has_plaid_item = PlaidItem.objects.filter(user=request.user).exists()
+    widgets = DashboardWidget.objects.filter(user=user, enabled=True).order_by("position")
 
-    # Fetch all accounts linked via Plaid for this user
-    accounts = Account.objects.filter(plaid_item__user=request.user)
+    WIDGET_MAP = {
+        "transactions": {
+            "title": "Recent Transactions",
+            "content": "<ul class='text-sm text-white space-y-[4px]'><li>Starbucks - $5.25</li><li>Amazon - $43.12</li><li>Rent - $1200.00</li></ul>"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "content": "<p class='text-sm text-white'>You have 2 unread alerts</p>"
+        },
+        "balances": {
+            "title": "Account Balances",
+            "content": "<p class='text-sm text-textSubtle'>Total Balance: $8,542.32</p>"
+        },
+        "budgets": {
+            "title": "Budget Overview",
+            "content": (
+                "<p class='text-sm text-textSubtle'>Groceries: 68% used</p>"
+                "<p class='text-sm text-textSubtle'>Dining: 92% used</p>"
+            )
+        },
+    }
 
-    # Filter account types into general categories for display
-    account_types = ["depository", "credit"]
+    rendered_widgets = [
+        {
+            "title": WIDGET_MAP[w.widget_type]["title"],
+            "content": WIDGET_MAP[w.widget_type]["content"]
+        }
+        for w in widgets
+        if w.widget_type in WIDGET_MAP
+    ]
 
-
-    # Render the dashboard page with the user’s accounts
-    return render(request, 'core/dashboard.html', {
-        'accounts': accounts,
-        'account_types': account_types,
+    return render(request, "core/dashboard.html", {
+        "rendered_widgets": rendered_widgets,
     })
