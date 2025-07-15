@@ -19,16 +19,24 @@ from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 
+from plaid_link.models import Transaction as PlaidTransaction
+
 @login_required
 def dashboard(request):
     user = request.user
 
     widgets = DashboardWidget.objects.filter(user=user, enabled=True).order_by("position")
 
+    recent_txns = PlaidTransaction.objects.filter(
+        account__plaid_item__user=user
+    ).order_by("-date")[:5]
+
     WIDGET_MAP = {
         "transactions": {
             "title": "Recent Transactions",
-            "content": "<ul class='text-sm text-white space-y-[4px]'><li>Starbucks - $5.25</li><li>Amazon - $43.12</li><li>Rent - $1200.00</li></ul>"
+            "content": render_to_string("core/components/widgets/transactions_widget.html", {
+                "transactions": recent_txns
+            }, request=request)
         },
         "notifications": {
             "title": "Notifications",
@@ -114,10 +122,16 @@ def add_widget(request):
         )
 
         if request.headers.get("Hx-Request") == "true":
+            recent_txns = PlaidTransaction.objects.filter(
+                account__plaid_item__user=user
+            ).order_by("-date")[:5]
+
             WIDGET_MAP = {
                 "transactions": {
                     "title": "Recent Transactions",
-                    "content": "<ul class='text-sm text-white space-y-[4px]'><li>Starbucks - $5.25</li><li>Amazon - $43.12</li><li>Rent - $1200.00</li></ul>"
+                    "content": render_to_string("core/components/widgets/transactions_widget.html", {
+                        "transactions": recent_txns
+                    }, request=request)
                 },
                 "notifications": {
                     "title": "Notifications",
