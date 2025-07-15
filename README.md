@@ -60,3 +60,4 @@ requirements.txt # Python dependencies
 
 > This project began as a learning experiment and has now transitioned into a polished, professional codebase as of **July 14, 2025**.  
 > All code, tickets, and commits going forward will reflect this shift in quality and consistency.
+> Git history was rebased July 15th, 2025 to unify authorship (accidental secondary Git identity). Feature branches and PR workflow were consistently used.
