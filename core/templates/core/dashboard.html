@@ -2,16 +2,49 @@
 
 {% block title %}Dashboard{% endblock %}
 
+{% block header %}
+  <div class="min-h-[72px] h-full w-full flex items-center justify-between">
+    <h1 class="text-[32px] font-bold">Dashboard</h1>
+
+    <div class="flex gap-[12px]">
+      <form
+        method="POST"
+        action="{% url 'core:toggle_edit_mode' %}"
+      >
+        {% csrf_token %}
+        <button type="submit" ...>
+          {% if edit_mode %}Done Editing{% else %}Edit Widgets{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+
 {% block content %}
-<div class="mb-6">
-  <h1 class="text-3xl font-bold">Dashboard</h1>
-</div>
 
 <!-- Grid layout for dashboard widgets -->
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
   {% for widget in rendered_widgets %}
-    {% include "core/components/dashboard_widget.html" with title=widget.title content=widget.content %}
+    {% include "core/components/dashboard_widget.html" with title=widget.title content=widget.content widget_type=widget.type edit_mode=edit_mode %}
   {% endfor %}
 </div>
+
+{% if edit_mode and available_widgets %}
+  <div class="mt-8 bg-cardBg p-4 rounded-xl shadow-card text-white">
+    <h2 class="text-lg font-semibold mb-4">Add a Widget</h2>
+    <div class="flex flex-wrap gap-4">
+      {% for widget_type in available_widgets %}
+        <form method="POST" action="{% url 'core:add_widget' %}">
+          {% csrf_token %}
+          <input type="hidden" name="widget_type" value="{{ widget_type }}">
+          <button type="submit" class="px-4 py-2 rounded-md bg-accent hover:bg-opacity-70 transition">
+            + {{ widget_type|capfirst }}
+          </button>
+        </form>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
 
 {% endblock %}

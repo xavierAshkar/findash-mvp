@@ -1,9 +1,25 @@
 <div class="rounded-xl shadow-card overflow-hidden">
   <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
-    <h2 class="text-lg font-semibold text-white">
-      {{ title }}
-    </h2>
+    <h2 class="text-lg font-semibold text-white">{{ title }}</h2>
+
+    {% if edit_mode %}
+      <form
+        method="POST"
+        action="{% url 'core:remove_widget' %}"
+        hx-post="{% url 'core:remove_widget' %}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-trigger="click"
+        hx-swap="none"
+        hx-on="htmx:afterRequest: window.location.reload()"
+      >
+        <input type="hidden" name="widget_type" value="{{ widget_type }}">
+        <button type="submit" class="text-sm text-red-400 hover:text-red-300">
+          ✕
+        </button>
+      </form>
+    {% endif %}
   </div>
+
   <div class="bg-cardBg px-[16px] py-[12px] space-y-[6px]">
     {{ content|safe }}
   </div>
