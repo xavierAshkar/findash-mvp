@@ -42,3 +42,28 @@ class Budget(models.Model):
 
     def __str__(self):
         return f"{self.name} - ${self.amount}"
+    
+class DashboardWidget(models.Model):
+    """
+    Represents a widget that appears on a user's dashboard.
+    Widgets are configurable per user and can be enabled/disabled or reordered.
+    """
+    class Meta:
+        unique_together = ("user", "widget_type")
+        indexes = [models.Index(fields=["user"]), models.Index(fields=["position"])]
+        ordering = ["position"]
+
+    WIDGET_CHOICES = [
+        ("transactions", "Recent Transactions"),
+        ("notifications", "Notifications"),
+        ("balances", "Account Balances"),
+        ("budgets", "Budget Overview"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dashboard_widgets")
+    widget_type = models.CharField(max_length=32, choices=WIDGET_CHOICES)
+    position = models.PositiveIntegerField(default=0)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.widget_type}"
