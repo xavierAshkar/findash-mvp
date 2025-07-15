@@ -15,6 +15,10 @@ from core.models import DashboardWidget
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseRedirect
 
+# For dynamic reloading withour full page reload of widgets
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+
 @login_required
 def dashboard(request):
     user = request.user
@@ -60,6 +64,17 @@ def dashboard(request):
 
     edit_mode = request.session.get("dashboard_edit_mode", False)
 
+    if request.GET.get("partial") == "chooser":
+        available_widgets = [
+            key for key in WIDGET_MAP
+            if not DashboardWidget.objects.filter(user=user, widget_type=key, enabled=True).exists()
+        ]
+
+        return render(request, "core/components/widget_chooser.html", {
+            "available_widgets": available_widgets,
+            "edit_mode": edit_mode,
+        })
+
     return render(request, "core/dashboard.html", {
         "rendered_widgets": rendered_widgets,
         "edit_mode": edit_mode,
@@ -73,22 +88,62 @@ def toggle_edit_mode(request):
     request.session["dashboard_edit_mode"] = not edit_mode
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
 
+
 @require_POST
 @login_required
 def remove_widget(request):
     widget_type = request.POST.get("widget_type")
     DashboardWidget.objects.filter(user=request.user, widget_type=widget_type).update(enabled=False)
+
+    if request.headers.get("Hx-Request") == "true":
+        return HttpResponse("")
+
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
 
 @require_POST
 @login_required
 def add_widget(request):
     widget_type = request.POST.get("widget_type")
-    
+    user = request.user
+
     if widget_type:
         DashboardWidget.objects.update_or_create(
-            user=request.user,
+            user=user,
             widget_type=widget_type,
             defaults={"enabled": True}
         )
+
+        if request.headers.get("Hx-Request") == "true":
+            WIDGET_MAP = {
+                "transactions": {
+                    "title": "Recent Transactions",
+                    "content": "<ul class='text-sm text-white space-y-[4px]'><li>Starbucks - $5.25</li><li>Amazon - $43.12</li><li>Rent - $1200.00</li></ul>"
+                },
+                "notifications": {
+                    "title": "Notifications",
+                    "content": "<p class='text-sm text-white'>You have 2 unread alerts</p>"
+                },
+                "balances": {
+                    "title": "Account Balances",
+                    "content": "<p class='text-sm text-textSubtle'>Total Balance: $8,542.32</p>"
+                },
+                "budgets": {
+                    "title": "Budget Overview",
+                    "content": (
+                        "<p class='text-sm text-textSubtle'>Groceries: 68% used</p>"
+                        "<p class='text-sm text-textSubtle'>Dining: 92% used</p>"
+                    )
+                },
+            }
+
+            data = {
+                "widget_type": widget_type,
+                "title": WIDGET_MAP[widget_type]["title"],
+                "content": WIDGET_MAP[widget_type]["content"],
+                "edit_mode": request.session.get("dashboard_edit_mode", False),
+            }
+
+            html = render_to_string("core/components/dashboard_widget.html", data, request=request)
+            return HttpResponse(html)
+
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
