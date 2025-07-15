@@ -1,4 +1,4 @@
-<div class="rounded-xl shadow-card overflow-hidden">
+<div id="widget-{{ widget_type }}" class="rounded-xl shadow-card overflow-hidden">
   <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
     <h2 class="text-lg font-semibold text-white">{{ title }}</h2>
 
@@ -7,10 +7,10 @@
         method="POST"
         action="{% url 'core:remove_widget' %}"
         hx-post="{% url 'core:remove_widget' %}"
+        hx-target="#widget-{{ widget_type }}"
+        hx-swap="outerHTML"
         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-        hx-trigger="click"
-        hx-swap="none"
-        hx-on="htmx:afterRequest: window.location.reload()"
+        hx-on="htmx:afterRequest: htmx.ajax('GET', '{% url 'core:dashboard' %}?partial=chooser', {target: '#widget-chooser'})"
       >
         <input type="hidden" name="widget_type" value="{{ widget_type }}">
         <button type="submit" class="text-sm text-red-400 hover:text-red-300">
