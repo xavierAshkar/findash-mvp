@@ -14,6 +14,15 @@ urlpatterns = [
     # Dashboard view (main post-login homepage)
     path('dashboard/', views.dashboard, name='dashboard'),
 
+    # Toggle edit mode for dashboard widgets
+    path("dashboard/toggle-edit-mode/", views.toggle_edit_mode, name="toggle_edit_mode"),
+
+    # Remove a widget from the dashboard
+    path("dashboard/remove-widget/", views.remove_widget, name="remove_widget"),
+
+    # Add a widget to the dashboard
+    path("dashboard/add-widget/", views.add_widget, name="add_widget"),
+
     # Accounts view
     path("accounts/", views.accounts_view, name="accounts"),
 
