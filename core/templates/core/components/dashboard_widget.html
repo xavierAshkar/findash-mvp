@@ -1,0 +1,12 @@
+<div class="rounded-xl shadow-card overflow-hidden">
+  <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+    <h2 class="text-lg font-semibold text-white">
+      {{ title }}
+    </h2>
+  </div>
+  <div class="bg-cardBg px-[16px] py-[12px] space-y-[6px]">
+    {% block widget_content %}
+      {{ content|safe }}
+    {% endblock %}
+  </div>
+</div>
