@@ -9,26 +9,9 @@
 
 <!-- Grid layout for dashboard widgets -->
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-  <!-- Transactions Widget -->
-  {% with transactions_html="<ul class='text-sm text-white space-y-[4px]'><li>Starbucks - $5.25</li><li>Amazon - $43.12</li><li>Rent - $1200.00</li></ul>" %}
-    {% include "core/components/dashboard_widget.html" with title="Recent Transactions" content=transactions_html %}
-  {% endwith %}
-
-  <!-- Notifications Widget -->
-  {% with alerts_html="<p class='text-sm text-white'>You have 2 unread alerts</p>" %}
-    {% include "core/components/dashboard_widget.html" with title="Notifications" content=alerts_html %}
-  {% endwith %}
-
-  <!-- Balances Widget -->
-  {% with balances_html="<p class='text-sm text-textSubtle'>Total Balance: $8,542.32</p>" %}
-    {% include "core/components/dashboard_widget.html" with title="Account Balances" content=balances_html %}
-  {% endwith %}
-
-  <!-- Budget Widget -->
-  {% with budgets_html="<p class='text-sm text-textSubtle'>Groceries: 68% used</p><p class='text-sm text-textSubtle'>Dining: 92% used</p>" %}
-    {% include "core/components/dashboard_widget.html" with title='Budget Overview' content=budgets_html %}
-  {% endwith %}
-
+  {% for widget in rendered_widgets %}
+    {% include "core/components/dashboard_widget.html" with title=widget.title content=widget.content %}
+  {% endfor %}
 </div>
+
 {% endblock %}
