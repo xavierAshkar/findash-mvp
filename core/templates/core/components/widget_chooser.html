@@ -1,0 +1,22 @@
+{% if edit_mode and available_widgets %}
+  <div class="mt-8 bg-cardBg p-4 rounded-xl shadow-card text-white">
+    <h2 class="text-lg font-semibold mb-4">Add a Widget</h2>
+    <div class="flex flex-wrap gap-4">
+      {% for widget_type in available_widgets %}
+        <form method="POST"
+              action="{% url 'core:add_widget' %}"
+              hx-post="{% url 'core:add_widget' %}"
+              hx-target="#widget-grid"
+              hx-swap="beforeend"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              hx-on="htmx:afterRequest: htmx.ajax('GET', '{% url 'core:dashboard' %}?partial=chooser', {target: '#widget-chooser'})"
+        >
+          <input type="hidden" name="widget_type" value="{{ widget_type }}">
+          <button type="submit" class="px-4 py-2 rounded-md bg-accent hover:bg-opacity-70 transition">
+            + {{ widget_type|capfirst }}
+          </button>
+        </form>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
