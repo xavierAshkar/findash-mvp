@@ -1,0 +1,50 @@
+{% load core_extras %}
+<div class="rounded-xl overflow-hidden">
+  <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
+    {% for account in selected_accounts %}
+      <li class="flex justify-between items-center">
+        <div>
+          <p class="text-base text-white">{{ account.name }}</p>
+          <p class="text-sm text-textSubtle">{{ account.subtype|title }}</p>
+        </div>
+        <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if edit_mode %}
+    <form
+      method="POST"
+      action="{% url 'core:update_balance_widget' %}"
+      hx-post="{% url 'core:update_balance_widget' %}"
+      hx-target="#widget-balances"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      class="mt-4 space-y-2"
+    >
+      <p class="text-sm text-textSubtle">Select up to 3 accounts to display:</p>
+
+      <div class="grid grid-cols-1 gap-2">
+        {% for acct in all_accounts %}
+          <label class="flex items-center gap-2 text-sm text-white">
+            <input
+              type="checkbox"
+              name="account_ids"
+              value="{{ acct.id }}"
+              {% if acct.id in selected_ids %}checked{% endif %}
+              class="accent-accent"
+            >
+            {{ acct.name }} – {{ acct.subtype|title }}
+          </label>
+        {% endfor %}
+      </div>
+
+      <button
+        type="submit"
+        class="mt-2 px-3 py-1 rounded-md bg-accent hover:bg-opacity-80 transition text-sm"
+      >
+        Save Selection
+      </button>
+    </form>
+  {% endif %}
+</div>

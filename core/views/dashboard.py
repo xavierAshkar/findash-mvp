@@ -20,6 +20,9 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 
 from plaid_link.models import Transaction as PlaidTransaction
+from plaid_link.models import Account as PlaidAccount
+
+from core.models import DashboardBalancePreference
 
 @login_required
 def dashboard(request):
@@ -30,6 +33,16 @@ def dashboard(request):
     recent_txns = PlaidTransaction.objects.filter(
         account__plaid_item__user=user
     ).order_by("-date")[:5]
+
+    if pref := DashboardBalancePreference.objects.filter(user=user).first():
+        all_selected = pref.accounts.select_related("plaid_item").all()
+        selected_accounts = all_selected[:3]
+        selected_ids = [a.id for a in selected_accounts]
+    else:
+        selected_accounts = []
+        selected_ids = []
+
+
 
     WIDGET_MAP = {
         "transactions": {
@@ -44,7 +57,16 @@ def dashboard(request):
         },
         "balances": {
             "title": "Account Balances",
-            "content": "<p class='text-sm text-textSubtle'>Total Balance: $8,542.32</p>"
+            "content": render_to_string(
+                "core/components/widgets/balances_widget.html",
+                {
+                    "selected_accounts": selected_accounts,
+                    "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
+                    "selected_ids": [a.id for a in selected_accounts],
+                    "edit_mode": request.session.get("dashboard_edit_mode", False),
+                },
+                request=request
+            )
         },
         "budgets": {
             "title": "Budget Overview",
@@ -126,6 +148,14 @@ def add_widget(request):
                 account__plaid_item__user=user
             ).order_by("-date")[:5]
 
+            selected_accounts_qs = PlaidAccount.objects.filter(
+                dashboardbalancepreference__user=user
+            ).select_related("plaid_item")
+
+            selected_accounts = list(selected_accounts_qs[:3])
+            selected_ids = [a.id for a in selected_accounts]
+
+
             WIDGET_MAP = {
                 "transactions": {
                     "title": "Recent Transactions",
@@ -139,7 +169,16 @@ def add_widget(request):
                 },
                 "balances": {
                     "title": "Account Balances",
-                    "content": "<p class='text-sm text-textSubtle'>Total Balance: $8,542.32</p>"
+                    "content": render_to_string(
+                        "core/components/widgets/balances_widget.html",
+                        {
+                            "selected_accounts": selected_accounts,
+                            "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
+                            "selected_ids": selected_ids,
+                            "edit_mode": request.session.get("dashboard_edit_mode", False),
+                        },
+                        request=request
+                    )
                 },
                 "budgets": {
                     "title": "Budget Overview",
@@ -161,3 +200,27 @@ def add_widget(request):
             return HttpResponse(html)
 
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
+
+@require_POST
+@login_required
+def update_balance_widget(request):
+    account_ids = request.POST.getlist("account_ids")[:3]  # limit to 3
+    accounts = PlaidAccount.objects.filter(id__in=account_ids, plaid_item__user=request.user)
+
+    setting, _ = DashboardBalancePreference.objects.get_or_create(user=request.user)
+    setting.accounts.set(accounts)
+
+    # Re-render widget
+    rendered = render_to_string("core/components/dashboard_widget.html", {
+        "title": "Account Balances",
+        "widget_type": "balances",
+        "content": render_to_string("core/components/widgets/balances_widget.html", {
+            "selected_accounts": accounts,
+            "all_accounts": PlaidAccount.objects.filter(plaid_item__user=request.user),
+            "selected_ids": [a.id for a in accounts],
+            "edit_mode": request.session.get("dashboard_edit_mode", False)
+        }, request=request),
+        "edit_mode": request.session.get("dashboard_edit_mode", False),
+    }, request=request)
+
+    return HttpResponse(rendered)

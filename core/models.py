@@ -67,3 +67,11 @@ class DashboardWidget(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.widget_type}"
+
+class DashboardBalancePreference(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    accounts = models.ManyToManyField("plaid_link.Account", related_name="dashboard_balance_preferences")
+
+    def __str__(self):
+        return f"{self.user}'s dashboard account prefs"
+
