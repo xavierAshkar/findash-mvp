@@ -1,0 +1,22 @@
+{% load core_extras %}
+<div class="rounded-xl overflow-hidden">
+  <ul class="bg-cardBg divide-y divide-gray-800">
+    {% for txn in transactions %}
+      <li class="py-[8px] flex justify-between items-center">
+        <div>
+          <p class="text-base text-white font-medium">{{ txn.name }}</p>
+          <p class="text-sm text-textSubtle">{{ txn.account.name }} &middot; {{ txn.date }}</p>
+        </div>
+        <p class="text-base font-semibold {% if txn.amount > 0 %}text-red-400{% else %}text-green-400{% endif %}">
+          {% if txn.amount > 0 %}
+            ${{ txn.amount|floatformat:2 }}
+          {% else %}
+            ${{ txn.amount|abs_val|floatformat:2 }}
+          {% endif %}
+        </p>
+      </li>
+    {% empty %}
+      <li class="py-[8px] text-textSubtle text-sm">No recent transactions found.</li>
+    {% endfor %}
+  </ul>
+</div>
