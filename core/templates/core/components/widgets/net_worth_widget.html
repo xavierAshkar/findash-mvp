@@ -1,0 +1,12 @@
+
+    <p class="text-white text-3xl font-bold mb-4">
+      ${{ net_worth_data.net_worth|floatformat:2 }}
+    </p>
+  
+    <div class="text-sm text-white mb-2">
+      Assets: ${{ net_worth_data.total_assets|floatformat:2 }}
+    </div>
+    <div class="text-sm text-white">
+      Liabilities: ${{ net_worth_data.total_liabilities|floatformat:2 }}
+    </div>
+  
