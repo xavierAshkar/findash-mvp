@@ -56,6 +56,19 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.name} ({self.subtype})"
     
+    @property
+    def is_asset(self):
+        return self.type in [
+            "cash",
+            "checking",
+            "savings",
+            "brokerage",
+            "hsa",
+            "money market",
+            "cd"
+        ]
+
+    
 class Transaction(models.Model):
     """
     Represents a financial transaction linked to an Account.

@@ -23,6 +23,8 @@ from plaid_link.models import Transaction as PlaidTransaction
 from plaid_link.models import Account as PlaidAccount
 
 from core.models import DashboardBalancePreference
+from core.utils.dashboard_data import get_net_worth_data
+
 
 @login_required
 def dashboard(request):
@@ -51,9 +53,15 @@ def dashboard(request):
                 "transactions": recent_txns
             }, request=request)
         },
-        "notifications": {
-            "title": "Notifications",
-            "content": "<p class='text-sm text-white'>You have 2 unread alerts</p>"
+        "net_worth": {
+            "title": "Net Worth",
+            "content": render_to_string(
+                "core/components/widgets/net_worth_widget.html",
+                {
+                    "net_worth_data": get_net_worth_data(user)
+                },
+                request=request
+            )
         },
         "balances": {
             "title": "Account Balances",
@@ -149,7 +157,7 @@ def add_widget(request):
             ).order_by("-date")[:5]
 
             selected_accounts_qs = PlaidAccount.objects.filter(
-                dashboardbalancepreference__user=user
+                dashboard_balance_preferences__user=user
             ).select_related("plaid_item")
 
             selected_accounts = list(selected_accounts_qs[:3])
@@ -163,9 +171,15 @@ def add_widget(request):
                         "transactions": recent_txns
                     }, request=request)
                 },
-                "notifications": {
-                    "title": "Notifications",
-                    "content": "<p class='text-sm text-white'>You have 2 unread alerts</p>"
+                "net_worth": {
+                    "title": "Net Worth",
+                    "content": render_to_string(
+                        "core/components/widgets/net_worth_widget.html",
+                        {
+                            "net_worth_data": get_net_worth_data(user)
+                        },
+                        request=request
+                    )
                 },
                 "balances": {
                     "title": "Account Balances",
