@@ -23,7 +23,7 @@ from plaid_link.models import Transaction as PlaidTransaction
 from plaid_link.models import Account as PlaidAccount
 
 from core.models import DashboardBalancePreference
-from core.utils.dashboard_data import get_net_worth_data
+from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data
 
 
 @login_required
@@ -78,9 +78,12 @@ def dashboard(request):
         },
         "budgets": {
             "title": "Budget Overview",
-            "content": (
-                "<p class='text-sm text-textSubtle'>Groceries: 68% used</p>"
-                "<p class='text-sm text-textSubtle'>Dining: 92% used</p>"
+            "content": render_to_string(
+                "core/components/widgets/budgets_widget.html",
+                {
+                    "data": get_budget_widget_data(user)
+                },
+                request=request
             )
         },
     }
@@ -196,9 +199,12 @@ def add_widget(request):
                 },
                 "budgets": {
                     "title": "Budget Overview",
-                    "content": (
-                        "<p class='text-sm text-textSubtle'>Groceries: 68% used</p>"
-                        "<p class='text-sm text-textSubtle'>Dining: 92% used</p>"
+                    "content": render_to_string(
+                        "core/components/widgets/budgets_widget.html",
+                        {
+                            "data": get_budget_widget_data(user)
+                        },
+                        request=request
                     )
                 },
             }

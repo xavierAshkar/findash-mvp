@@ -1,0 +1,7 @@
+{% for b in data %}
+  <p class="text-sm text-textSubtle">
+    {{ b.name }} – {{ b.percent|floatformat:0 }}% used
+  </p>
+{% empty %}
+  <p class="text-sm text-textSubtle">No budgets found for this month.</p>
+{% endfor %}
