@@ -20,4 +20,4 @@ def delete_account_view(request):
 
 @login_required
 def profile_view(request):
-    return render(request, "core/profile.html")
+    return render(request, "core/profile/index.html")
