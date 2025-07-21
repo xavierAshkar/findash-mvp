@@ -38,6 +38,17 @@
       [x-cloak] {
         display: none !important;
       }
+      .txn-fade {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .txn-fade.fade-active {
+        mask-image: linear-gradient(to right, black 80%, transparent);
+        -webkit-mask-image: linear-gradient(to right, black 80%, transparent);
+      }
     </style>
     <!-- Define your custom colors -->
     <script>
@@ -335,6 +346,29 @@
           window.location.reload();
         }
       });
+    </script>
+    <script>
+    function applyTxnFade() {
+      document.querySelectorAll('.txn-fade').forEach(function(el) {
+        el.classList.remove('fade-active');
+        if (el.scrollWidth > el.clientWidth - 10) {
+          el.classList.add('fade-active');
+        }
+      });
+    }
+
+    // Run on initial load
+    window.addEventListener("load", applyTxnFade);
+
+    // Run after HTMX swaps (if you use HTMX)
+    document.body.addEventListener("htmx:afterSwap", applyTxnFade);
+
+    // Run on window resize (for responsive layouts)
+    window.addEventListener("resize", function() {
+      // Use a timeout to avoid excessive calls during resize
+      clearTimeout(window._txnFadeTimeout);
+      window._txnFadeTimeout = setTimeout(applyTxnFade, 100);
+    });
     </script>
     {% block scripts %}{% endblock %}
   </body>

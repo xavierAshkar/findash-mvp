@@ -1,12 +1,13 @@
 <div
   id="widget-{{ widget_type }}"
-  class="dashboard-widget rounded-xl shadow-card overflow-hidden"
+  class="dashboard-widget rounded-xl shadow-card overflow-hidden h-[360px]"
   data-widget-id="{{ widget_type }}"
   {% if edit_mode %}
     draggable="true"
   {% endif %}
 >
-  <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+  <!-- Header -->
+  <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center h-[48px]">
     <h2 class="text-lg font-semibold text-white">{{ title }}</h2>
 
     {% if edit_mode %}
@@ -27,7 +28,8 @@
     {% endif %}
   </div>
 
-  <div class="bg-cardBg px-[16px] py-[12px] space-y-[6px]">
+  <!-- Body -->
+  <div class="bg-cardBg px-[16px] py-[12px] text-white text-sm space-y-[6px] h-[calc(360px-48px)]">
     {{ content|safe }}
   </div>
 </div>
