@@ -1,0 +1,23 @@
+<!-- _header.html -->
+<header id="dashboard-header" class="sticky top-0 h-[72px] bg-primaryBg flex items-center justify-between px-[36px]">
+  <div class="flex items-center justify-between w-full h-full">
+    <h1 class="text-[32px] font-bold">Dashboard</h1>
+
+    <form
+      method="POST"
+      action="{% url 'core:toggle_edit_mode' %}"
+      hx-post="{% url 'core:toggle_edit_mode' %}"
+      hx-target="#dashboard-header"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-on="htmx:afterRequest: 
+        htmx.ajax('GET', `{% url 'core:dashboard' %}?partial=main`, {target: '#dashboard-main'}); 
+        htmx.ajax('GET', `{% url 'core:dashboard' %}?partial=chooser`, {target: '#widget-chooser'});"
+    >
+      {% csrf_token %}
+      <button type="submit" class="px-4 py-2 rounded-md bg-accent hover:bg-opacity-70 transition">
+        {% if edit_mode %}Done Editing{% else %}Edit Widgets{% endif %}
+      </button>
+    </form>
+  </div>
+</header>

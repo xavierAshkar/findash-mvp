@@ -10,6 +10,7 @@ Handles:
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from core.models import DashboardWidget
+from core.utils.dashboard_widgets import get_widget_map
 
 # For the toggle edit mode and delete widget functionality
 from django.views.decorators.http import require_POST
@@ -25,11 +26,17 @@ from plaid_link.models import Account as PlaidAccount
 from core.models import DashboardBalancePreference
 from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data
 
+from django.http import JsonResponse
+import json
+
 
 @login_required
 def dashboard(request):
     user = request.user
 
+    if "dashboard_edit_mode" not in request.session:
+        request.session["dashboard_edit_mode"] = False
+    
     widgets = DashboardWidget.objects.filter(user=user, enabled=True).order_by("position")
 
     recent_txns = PlaidTransaction.objects.filter(
@@ -44,53 +51,7 @@ def dashboard(request):
         selected_accounts = []
         selected_ids = []
 
-
-
-    WIDGET_MAP = {
-        "transactions": {
-            "title": "Recent Transactions",
-            "content": render_to_string(
-                "core/dashboard/widgets/transactions_widget.html", 
-                {
-                    "transactions": recent_txns
-                }, 
-                request=request
-            )
-        },
-        "net_worth": {
-            "title": "Net Worth",
-            "content": render_to_string(
-                "core/dashboard/widgets/net_worth_widget.html",
-                {
-                    "net_worth_data": get_net_worth_data(user)
-                },
-                request=request
-            )
-        },
-        "balances": {
-            "title": "Account Balances",
-            "content": render_to_string(
-                "core/dashboard/widgets/balances_widget.html",
-                {
-                    "selected_accounts": selected_accounts,
-                    "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
-                    "selected_ids": [a.id for a in selected_accounts],
-                    "edit_mode": request.session.get("dashboard_edit_mode", False),
-                },
-                request=request
-            )
-        },
-        "budgets": {
-            "title": "Budget Overview",
-            "content": render_to_string(
-                "core/dashboard/widgets/budgets_widget.html",
-                {
-                    "data": get_budget_widget_data(user)
-                },
-                request=request
-            )
-        },
-    }
+    WIDGET_MAP = get_widget_map(user, request)
 
     rendered_widgets = [
         {
@@ -131,8 +92,13 @@ def dashboard(request):
 def toggle_edit_mode(request):
     edit_mode = request.session.get("dashboard_edit_mode", False)
     request.session["dashboard_edit_mode"] = not edit_mode
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
 
+    if request.headers.get("Hx-Request") == "true":
+        return render(request, "core/dashboard/partials/_header.html", {
+            "edit_mode": request.session["dashboard_edit_mode"],
+        })
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
 
 @require_POST
 @login_required
@@ -170,53 +136,7 @@ def add_widget(request):
             selected_accounts = list(selected_accounts_qs[:3])
             selected_ids = [a.id for a in selected_accounts]
 
-
-            WIDGET_MAP = {
-                "transactions": {
-                    "title": "Recent Transactions",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/transactions_widget.html", 
-                        {
-                            "transactions": recent_txns
-                        }, 
-                        request=request
-                    )
-                },
-                "net_worth": {
-                    "title": "Net Worth",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/net_worth_widget.html",
-                        {
-                            "net_worth_data": get_net_worth_data(user)
-                        },
-                        request=request
-                    )
-                },
-                "balances": {
-                    "title": "Account Balances",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/balances_widget.html",
-                        {
-                            "selected_accounts": selected_accounts,
-                            "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
-                            "selected_ids": [a.id for a in selected_accounts],
-                            "edit_mode": request.session.get("dashboard_edit_mode", False),
-                        },
-                        request=request
-                    )
-                },
-                "budgets": {
-                    "title": "Budget Overview",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/budgets_widget.html",
-                        {
-                            "data": get_budget_widget_data(user)
-                        },
-                        request=request
-                    )
-                },
-            }
-
+            WIDGET_MAP = get_widget_map(user, request)
 
             data = {
                 "widget_type": widget_type,
@@ -243,7 +163,7 @@ def update_balance_widget(request):
     rendered = render_to_string("core/components/dashboard_widget.html", {
         "title": "Account Balances",
         "widget_type": "balances",
-        "content": render_to_string("core/components/widgets/balances_widget.html", {
+        "content": render_to_string("core/dashboard/widgets/balances_widget.html", {
             "selected_accounts": accounts,
             "all_accounts": PlaidAccount.objects.filter(plaid_item__user=request.user),
             "selected_ids": [a.id for a in accounts],
@@ -253,3 +173,14 @@ def update_balance_widget(request):
     }, request=request)
 
     return HttpResponse(rendered)
+
+@require_POST
+@login_required
+def save_widget_order(request):
+    data = json.loads(request.body)
+    order = data.get("order", [])
+
+    for item in order:
+        DashboardWidget.objects.filter(user=request.user, widget_type=item["widget_type"]).update(position=item["position"])
+
+    return JsonResponse({"status": "success"})

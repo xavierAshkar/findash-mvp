@@ -1,10 +1,18 @@
+# core/utils/widget.py
+
 from ..models import DashboardWidget
+from core.constants import (
+    WIDGET_TRANSACTIONS,
+    WIDGET_NET_WORTH,
+    WIDGET_BALANCES,
+    WIDGET_BUDGETS,
+)
 
 DEFAULT_WIDGETS = [
-    ("transactions", 0),
-    ("notifications", 1),
-    ("balances", 2),
-    ("budgets", 3),
+    (WIDGET_TRANSACTIONS, 0),
+    (WIDGET_NET_WORTH, 1),
+    (WIDGET_BALANCES, 2),
+    (WIDGET_BUDGETS, 3),
 ]
 
 def create_default_widgets(user):
