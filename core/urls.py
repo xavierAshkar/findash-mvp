@@ -26,6 +26,8 @@ urlpatterns = [
     # Update the balance widget on the dashboard
     path("dashboard/update-balance-widget/", views.update_balance_widget, name="update_balance_widget"),
 
+    path("dashboard/save-widget-order/", views.save_widget_order, name="save_widget_order"),
+
     # Accounts view
     path("accounts/", views.accounts_view, name="accounts"),
 
