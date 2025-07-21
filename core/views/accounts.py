@@ -49,7 +49,7 @@ def accounts_view(request):
     total_liabilities = total_credit
     net_worth = total_assets + total_liabilities
 
-    return render(request, "core/accounts.html", {
+    return render(request, "core/accounts/index.html", {
         "accounts": accounts,
         "common_assets": common_assets,
         "other_assets": other_assets,

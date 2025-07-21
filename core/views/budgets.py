@@ -73,7 +73,7 @@ def budgets(request):
 
     user_tags = Tag.objects.filter(user=user)
 
-    return render(request, 'core/budgets.html', {
+    return render(request, 'core/budgets/index.html', {
         "budget_data": budget_data,
         "user_tags": user_tags,
     })

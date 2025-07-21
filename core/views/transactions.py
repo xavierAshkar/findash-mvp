@@ -64,7 +64,7 @@ def transactions_view(request):
 
     user_tags = Tag.objects.filter(user=request.user)
 
-    return render(request, "core/transactions.html", {
+    return render(request, "core/transactions/index.html", {
         "grouped_transactions": grouped_transactions,
         "user_accounts": user_accounts,
         "user_tags": user_tags,
