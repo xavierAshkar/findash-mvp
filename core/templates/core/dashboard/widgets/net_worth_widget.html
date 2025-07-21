@@ -1,10 +1,44 @@
-<p class="text-white text-3xl font-bold mb-4">
+<!-- Centered Net Worth -->
+<div class="text-center mt-12 mb-16">
+  <p class="text-white text-5xl font-bold">
     ${{ net_worth_data.net_worth|floatformat:2 }}
-</p>
-
-<div class="text-sm text-white mb-2">
-    Assets: ${{ net_worth_data.total_assets|floatformat:2 }}
+  </p>
 </div>
-<div class="text-sm text-white">
-    Liabilities: ${{ net_worth_data.total_liabilities|floatformat:2 }}
+
+<!-- Asset and Liability Columns -->
+<div class="flex justify-between gap-4 text-sm text-white">
+  <!-- Assets -->
+  <div class="flex-1">
+    <div class="text-center mb-2">
+      <span class="font-medium">Assets:</span>
+      <span class="text-green-400">${{ net_worth_data.total_assets|floatformat:2 }}</span>
+    </div>
+    <ul class="text-xs text-green-300 space-y-1">
+      {% for acc in net_worth_data.asset_accounts %}
+        <li class="flex justify-between">
+          <span>{{ acc.name }}</span>
+          <span>${{ acc.current_balance|floatformat:2 }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-[1px] bg-cardHeader"></div>
+
+  <!-- Liabilities -->
+  <div class="flex-1">
+    <div class="text-center mb-2">
+      <span class="font-medium">Liabilities:</span>
+      <span class="text-red-400">${{ net_worth_data.total_liabilities|floatformat:2 }}</span>
+    </div>
+    <ul class="text-xs text-red-300 space-y-1 text-right">
+      {% for acc in net_worth_data.credit_accounts %}
+        <li class="flex justify-between">
+          <span>{{ acc.name }}</span>
+          <span>${{ acc.current_balance|floatformat:2 }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
