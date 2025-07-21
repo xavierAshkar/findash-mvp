@@ -3,6 +3,8 @@
 <!-- This file extends the base_app.html template and includes the header and main content for the dashboard. -->
 {% extends "base_app.html" %}
 
+{% load static %}
+
 {% block title %}Dashboard{% endblock %}
 
 {% block header %}
@@ -11,4 +13,11 @@
 
 {% block content %}
   {% include "core/dashboard/partials/_main.html" %}
+{% endblock %}
+
+{% block scripts %}
+  {% if edit_mode %}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="{% static 'core/js/dashboard_drag.js' %}"></script>
+  {% endif %}
 {% endblock %}

@@ -26,6 +26,9 @@ from plaid_link.models import Account as PlaidAccount
 from core.models import DashboardBalancePreference
 from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data
 
+from django.http import JsonResponse
+import json
+
 
 @login_required
 def dashboard(request):
@@ -170,3 +173,14 @@ def update_balance_widget(request):
     }, request=request)
 
     return HttpResponse(rendered)
+
+@require_POST
+@login_required
+def save_widget_order(request):
+    data = json.loads(request.body)
+    order = data.get("order", [])
+
+    for item in order:
+        DashboardWidget.objects.filter(user=request.user, widget_type=item["widget_type"]).update(position=item["position"])
+
+    return JsonResponse({"status": "success"})
