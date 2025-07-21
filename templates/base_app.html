@@ -306,9 +306,7 @@
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col shadow-left-lg z-10 overflow-y-auto scrollbar-auto">
           <!-- Header -->
-          <header class="sticky top-0 h-[72px] bg-primaryBg flex items-center justify-between px-[36px]">
-            {% block header %}{% endblock %}
-          </header>
+          {% block header %}{% endblock %}
 
           <!-- Toolbar -->
           {% block toolbar %}

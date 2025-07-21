@@ -30,6 +30,9 @@ from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data
 def dashboard(request):
     user = request.user
 
+    if "dashboard_edit_mode" not in request.session:
+        request.session["dashboard_edit_mode"] = False
+    
     widgets = DashboardWidget.objects.filter(user=user, enabled=True).order_by("position")
 
     recent_txns = PlaidTransaction.objects.filter(
@@ -131,8 +134,13 @@ def dashboard(request):
 def toggle_edit_mode(request):
     edit_mode = request.session.get("dashboard_edit_mode", False)
     request.session["dashboard_edit_mode"] = not edit_mode
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
 
+    if request.headers.get("Hx-Request") == "true":
+        return render(request, "core/dashboard/partials/_header.html", {
+            "edit_mode": request.session["dashboard_edit_mode"],
+        })
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/dashboard/"))
 
 @require_POST
 @login_required
