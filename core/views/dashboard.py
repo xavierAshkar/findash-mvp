@@ -243,7 +243,7 @@ def update_balance_widget(request):
     rendered = render_to_string("core/components/dashboard_widget.html", {
         "title": "Account Balances",
         "widget_type": "balances",
-        "content": render_to_string("core/components/widgets/balances_widget.html", {
+        "content": render_to_string("core/dashboard/widgets/balances_widget.html", {
             "selected_accounts": accounts,
             "all_accounts": PlaidAccount.objects.filter(plaid_item__user=request.user),
             "selected_ids": [a.id for a in accounts],
