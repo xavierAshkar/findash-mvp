@@ -1,34 +1,23 @@
+<!-- Index file for the dashboard page -->
+
+<!-- This file extends the base_app.html template and includes the header and main content for the dashboard. -->
 {% extends "base_app.html" %}
+
+{% load static %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block header %}
-  <div class="min-h-[72px] h-full w-full flex items-center justify-between">
-    <h1 class="text-[32px] font-bold">Dashboard</h1>
-
-    <div class="flex gap-[12px]">
-      <form method="POST" action="{% url 'core:toggle_edit_mode' %}">
-        {% csrf_token %}
-          <button type="submit" class="px-4 py-2 rounded-md bg-accent hover:bg-opacity-70 transition">
-            {% if edit_mode %}Done Editing{% else %}Edit Widgets{% endif %}
-          </button>
-      </form>
-    </div>
-  </div>
+  {% include "core/dashboard/partials/_header.html" %}
 {% endblock %}
 
-
 {% block content %}
+  {% include "core/dashboard/partials/_main.html" %}
+{% endblock %}
 
-<!-- Grid layout for dashboard widgets -->
-<div id="widget-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-  {% for widget in rendered_widgets %}
-    {% include "core/components/dashboard_widget.html" with title=widget.title content=widget.content widget_type=widget.type edit_mode=edit_mode %}
-  {% endfor %}
-</div>
-
-<div id="widget-chooser">
-  {% include "core/components/widget_chooser.html" %}
-</div>
-
+{% block scripts %}
+  {% if edit_mode %}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="{% static 'core/js/dashboard_drag.js' %}"></script>
+  {% endif %}
 {% endblock %}

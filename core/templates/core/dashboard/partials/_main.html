@@ -1,0 +1,10 @@
+<!-- Main content partial for the dashboard page -->
+<div id="widget-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  {% for widget in rendered_widgets %}
+    {% include "core/components/dashboard_widget.html" with title=widget.title content=widget.content widget_type=widget.type edit_mode=edit_mode %}
+  {% endfor %}
+</div>
+
+<div id="widget-chooser">
+  {% include "core/components/widget_chooser.html" %}
+</div>

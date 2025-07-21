@@ -1,4 +1,11 @@
-<div id="widget-{{ widget_type }}" class="rounded-xl shadow-card overflow-hidden">
+<div
+  id="widget-{{ widget_type }}"
+  class="dashboard-widget rounded-xl shadow-card overflow-hidden"
+  data-widget-id="{{ widget_type }}"
+  {% if edit_mode %}
+    draggable="true"
+  {% endif %}
+>
   <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
     <h2 class="text-lg font-semibold text-white">{{ title }}</h2>
 
