@@ -10,6 +10,7 @@ Handles:
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from core.models import DashboardWidget
+from core.utils.dashboard_widgets import get_widget_map
 
 # For the toggle edit mode and delete widget functionality
 from django.views.decorators.http import require_POST
@@ -47,53 +48,7 @@ def dashboard(request):
         selected_accounts = []
         selected_ids = []
 
-
-
-    WIDGET_MAP = {
-        "transactions": {
-            "title": "Recent Transactions",
-            "content": render_to_string(
-                "core/dashboard/widgets/transactions_widget.html", 
-                {
-                    "transactions": recent_txns
-                }, 
-                request=request
-            )
-        },
-        "net_worth": {
-            "title": "Net Worth",
-            "content": render_to_string(
-                "core/dashboard/widgets/net_worth_widget.html",
-                {
-                    "net_worth_data": get_net_worth_data(user)
-                },
-                request=request
-            )
-        },
-        "balances": {
-            "title": "Account Balances",
-            "content": render_to_string(
-                "core/dashboard/widgets/balances_widget.html",
-                {
-                    "selected_accounts": selected_accounts,
-                    "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
-                    "selected_ids": [a.id for a in selected_accounts],
-                    "edit_mode": request.session.get("dashboard_edit_mode", False),
-                },
-                request=request
-            )
-        },
-        "budgets": {
-            "title": "Budget Overview",
-            "content": render_to_string(
-                "core/dashboard/widgets/budgets_widget.html",
-                {
-                    "data": get_budget_widget_data(user)
-                },
-                request=request
-            )
-        },
-    }
+    WIDGET_MAP = get_widget_map(user, request)
 
     rendered_widgets = [
         {
@@ -178,53 +133,7 @@ def add_widget(request):
             selected_accounts = list(selected_accounts_qs[:3])
             selected_ids = [a.id for a in selected_accounts]
 
-
-            WIDGET_MAP = {
-                "transactions": {
-                    "title": "Recent Transactions",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/transactions_widget.html", 
-                        {
-                            "transactions": recent_txns
-                        }, 
-                        request=request
-                    )
-                },
-                "net_worth": {
-                    "title": "Net Worth",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/net_worth_widget.html",
-                        {
-                            "net_worth_data": get_net_worth_data(user)
-                        },
-                        request=request
-                    )
-                },
-                "balances": {
-                    "title": "Account Balances",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/balances_widget.html",
-                        {
-                            "selected_accounts": selected_accounts,
-                            "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
-                            "selected_ids": [a.id for a in selected_accounts],
-                            "edit_mode": request.session.get("dashboard_edit_mode", False),
-                        },
-                        request=request
-                    )
-                },
-                "budgets": {
-                    "title": "Budget Overview",
-                    "content": render_to_string(
-                        "core/dashboard/widgets/budgets_widget.html",
-                        {
-                            "data": get_budget_widget_data(user)
-                        },
-                        request=request
-                    )
-                },
-            }
-
+            WIDGET_MAP = get_widget_map(user, request)
 
             data = {
                 "widget_type": widget_type,
