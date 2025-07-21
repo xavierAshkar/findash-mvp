@@ -18,7 +18,7 @@ def get_net_worth_data(user):
         "credit_accounts": credit_card_accounts,
         "total_assets": total_assets,
         "total_liabilities": total_liabilities,
-        "net_worth": total_assets + total_liabilities
+        "net_worth": total_assets - total_liabilities
     }
 
 
