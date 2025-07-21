@@ -49,14 +49,18 @@ def dashboard(request):
     WIDGET_MAP = {
         "transactions": {
             "title": "Recent Transactions",
-            "content": render_to_string("core/components/widgets/transactions_widget.html", {
-                "transactions": recent_txns
-            }, request=request)
+            "content": render_to_string(
+                "core/dashboard/widgets/transactions_widget.html", 
+                {
+                    "transactions": recent_txns
+                }, 
+                request=request
+            )
         },
         "net_worth": {
             "title": "Net Worth",
             "content": render_to_string(
-                "core/components/widgets/net_worth_widget.html",
+                "core/dashboard/widgets/net_worth_widget.html",
                 {
                     "net_worth_data": get_net_worth_data(user)
                 },
@@ -66,7 +70,7 @@ def dashboard(request):
         "balances": {
             "title": "Account Balances",
             "content": render_to_string(
-                "core/components/widgets/balances_widget.html",
+                "core/dashboard/widgets/balances_widget.html",
                 {
                     "selected_accounts": selected_accounts,
                     "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
@@ -79,7 +83,7 @@ def dashboard(request):
         "budgets": {
             "title": "Budget Overview",
             "content": render_to_string(
-                "core/components/widgets/budgets_widget.html",
+                "core/dashboard/widgets/budgets_widget.html",
                 {
                     "data": get_budget_widget_data(user)
                 },
@@ -116,7 +120,7 @@ def dashboard(request):
             "edit_mode": edit_mode,
         })
 
-    return render(request, "core/dashboard.html", {
+    return render(request, "core/dashboard/index.html", {
         "rendered_widgets": rendered_widgets,
         "edit_mode": edit_mode,
         "available_widgets": available_widgets,
@@ -170,14 +174,18 @@ def add_widget(request):
             WIDGET_MAP = {
                 "transactions": {
                     "title": "Recent Transactions",
-                    "content": render_to_string("core/components/widgets/transactions_widget.html", {
-                        "transactions": recent_txns
-                    }, request=request)
+                    "content": render_to_string(
+                        "core/dashboard/widgets/transactions_widget.html", 
+                        {
+                            "transactions": recent_txns
+                        }, 
+                        request=request
+                    )
                 },
                 "net_worth": {
                     "title": "Net Worth",
                     "content": render_to_string(
-                        "core/components/widgets/net_worth_widget.html",
+                        "core/dashboard/widgets/net_worth_widget.html",
                         {
                             "net_worth_data": get_net_worth_data(user)
                         },
@@ -187,11 +195,11 @@ def add_widget(request):
                 "balances": {
                     "title": "Account Balances",
                     "content": render_to_string(
-                        "core/components/widgets/balances_widget.html",
+                        "core/dashboard/widgets/balances_widget.html",
                         {
                             "selected_accounts": selected_accounts,
                             "all_accounts": PlaidAccount.objects.filter(plaid_item__user=user),
-                            "selected_ids": selected_ids,
+                            "selected_ids": [a.id for a in selected_accounts],
                             "edit_mode": request.session.get("dashboard_edit_mode", False),
                         },
                         request=request
@@ -200,7 +208,7 @@ def add_widget(request):
                 "budgets": {
                     "title": "Budget Overview",
                     "content": render_to_string(
-                        "core/components/widgets/budgets_widget.html",
+                        "core/dashboard/widgets/budgets_widget.html",
                         {
                             "data": get_budget_widget_data(user)
                         },
@@ -208,6 +216,7 @@ def add_widget(request):
                     )
                 },
             }
+
 
             data = {
                 "widget_type": widget_type,
