@@ -1,0 +1,27 @@
+<header id="accounts-header" class="sticky top-0 h-[72px] bg-primaryBg flex items-center justify-between px-[36px]">
+  <div class="flex items-center justify-between w-full h-full">
+    <h1 class="text-[32px] font-bold">Accounts</h1>
+
+    <div class="flex gap-[12px] ">
+      <form
+        hx-post="{% url 'plaid:sync_all' %}"
+        hx-swap="none"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      >
+        <button
+          type="submit"
+          class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md hover:bg-cardHeader hover:shadow-card active:bg-hoverBg transition cursor-pointer"
+        >
+          Refresh all
+        </button>
+      </form>
+
+      <a
+        href="{% url 'plaid:link_account' %}"
+        class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
+      >
+        + Add account
+      </a>
+    </div>
+  </div>
+</header>

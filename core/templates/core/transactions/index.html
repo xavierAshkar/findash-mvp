@@ -3,19 +3,7 @@
 {% block title %}Transactions{% endblock %}
 
 {% block header %}
-  <div class="min-h-[72px] h-full w-full flex items-center justify-between">
-    <h1 class="text-[32px] font-bold">Transactions</h1>
-
-    <div class="flex gap-[12px]">
-      <!-- Add Transaction -->
-      <a
-        href="{% url 'core:add_transaction' %}"
-        class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
-      >
-        + Add transaction
-      </a>
-    </div>
-  </div>
+  {% include "core/transactions/partials/_header.html" %}
 {% endblock %}
 
 {% block toolbar %}
