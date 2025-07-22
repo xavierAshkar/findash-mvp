@@ -11,26 +11,38 @@
     <!-- Load Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* Show scrollbar only while scrolling (WebKit only) */
       .scrollbar-auto {
-        scrollbar-width: auto; /* Firefox */
+        scrollbar-gutter: stable;
+        overflow-y: auto;
       }
 
+      /* Firefox */
+      .scrollbar-auto {
+        scrollbar-width: thin;
+        scrollbar-color: #2a2a2e transparent;
+      }
+
+      .scrollbar-auto:hover {
+        scrollbar-color: #3a3a40 transparent;
+      }
+
+      /* Chrome/Safari (WebKit) */
       .scrollbar-auto::-webkit-scrollbar {
         width: 8px;
       }
 
       .scrollbar-auto::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
+        background-color: #2a2a2e; /* barely visible against #202024 */
+        border-radius: 12px;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .scrollbar-auto:hover::-webkit-scrollbar-thumb {
+        background-color: #313035;
       }
 
       .scrollbar-auto::-webkit-scrollbar-track {
         background: transparent;
-      }
-
-      .scrollbar-auto {
-        scrollbar-gutter: stable;
       }
       .shadow-left-lg {
         box-shadow: -6px 0 12px -6px rgba(0, 0, 0, 0.25);

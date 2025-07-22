@@ -33,16 +33,26 @@ def get_budget_widget_data(user, max_items=3):
 
     data = []
     for budget in Budget.objects.filter(user=user):
-        tag_ids = set(t.id for t in budget.tags.all())
+        tags = budget.tags.all()
+        tag_ids = {t.id for t in tags}
         total_spent = sum(t.amount for t in transactions if t.tag and t.tag.id in tag_ids)
         percent = float(total_spent) / float(budget.amount) if budget.amount else 0
+
+        if percent >= 1.0:
+            color = "#ef4444"  # red
+        elif percent >= 0.75:
+            color = "#facc15"  # yellow
+        else:
+            color = "#4ade80"  # green
 
         data.append({
             "name": budget.name,
             "spent": total_spent,
             "limit": budget.amount,
             "percent": percent * 100,
+            "color": color,
+            "tags": [t.name for t in tags],  # 👈 add this
         })
 
-    # Sort by % used descending and limit to `max_items`
     return sorted(data, key=lambda b: b["percent"], reverse=True)[:max_items]
+
