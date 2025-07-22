@@ -3,6 +3,8 @@ from django.utils import timezone
 from decimal import Decimal
 from plaid_link.models import Account, Transaction
 from core.models import Budget
+from core.models import AccountBalanceSnapshot
+from django.utils.timezone import now
 
 def get_net_worth_data(user):
     accounts = Account.objects.filter(plaid_item__user=user)
@@ -56,3 +58,25 @@ def get_budget_widget_data(user, max_items=3):
 
     return sorted(data, key=lambda b: b["percent"], reverse=True)[:max_items]
 
+def get_account_balance_deltas(user):
+    today = now().date()
+    last_month = today.replace(day=1).replace(month=today.month - 1 or 12)
+
+    deltas = []
+    for acct in Account.objects.filter(plaid_item__user=user):
+        try:
+            prev = AccountBalanceSnapshot.objects.get(user=user, account=acct, date=last_month)
+            delta = acct.balance - prev.balance
+            pct_change = (delta / prev.balance * 100) if prev.balance != 0 else None
+        except AccountBalanceSnapshot.DoesNotExist:
+            delta = None
+            pct_change = None
+
+        deltas.append({
+            "account": acct,
+            "current": acct.current_balance,
+            "delta": delta,
+            "pct_change": pct_change,
+        })
+
+    return deltas
