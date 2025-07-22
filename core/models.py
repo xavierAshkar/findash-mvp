@@ -7,6 +7,7 @@ These models are used to categorize and manage user budgets and financial tags.
 
 from django.db import models
 from django.conf import settings
+from core.constants import WIDGET_CHOICES
 
 class Tag(models.Model):
     """
@@ -53,15 +54,8 @@ class DashboardWidget(models.Model):
         indexes = [models.Index(fields=["user"]), models.Index(fields=["position"])]
         ordering = ["position"]
 
-    WIDGET_CHOICES = [
-        ("transactions", "Recent Transactions"),
-        ("notifications", "Notifications"),
-        ("balances", "Account Balances"),
-        ("budgets", "Budget Overview"),
-    ]
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dashboard_widgets")
     widget_type = models.CharField(max_length=32, choices=WIDGET_CHOICES)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dashboard_widgets")
     position = models.PositiveIntegerField(default=0)
     enabled = models.BooleanField(default=True)
 
@@ -75,3 +69,12 @@ class DashboardBalancePreference(models.Model):
     def __str__(self):
         return f"{self.user}'s dashboard account prefs"
 
+
+class AccountBalanceSnapshot(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    account = models.ForeignKey("plaid_link.Account", on_delete=models.CASCADE)
+    date = models.DateField()
+    balance = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        unique_together = ('user', 'account', 'date')

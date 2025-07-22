@@ -1,7 +1,7 @@
 # core/utils/dashboard_widgets.py
 from django.template.loader import render_to_string
 from plaid_link.models import Transaction as PlaidTransaction, Account as PlaidAccount
-from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data
+from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data, get_account_balance_deltas
 from core.models import DashboardBalancePreference
 
 def get_widget_map(user, request):
@@ -47,6 +47,14 @@ def get_widget_map(user, request):
             "content": render_to_string(
                 "core/dashboard/widgets/budgets_widget.html",
                 {"data": get_budget_widget_data(user)}, request=request
+            )
+        },
+        "balance change": {
+            "title": "Account Balance Changes",
+            "content": render_to_string(
+                "core/dashboard/widgets/balance_change_widget.html",
+                {"deltas": get_account_balance_deltas(user)},
+                request=request
             )
         },
     }
