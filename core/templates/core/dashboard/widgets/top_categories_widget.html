@@ -1,0 +1,12 @@
+{% if categories %}
+<ul class="space-y-2">
+  {% for c in categories %}
+    <li class="flex justify-between">
+      <span>{{ c.name|capfirst }}</span>
+      <span class="text-red-400 font-medium">${{ c.amount|floatformat:2 }}</span>
+    </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-textSubtle">No spending categories yet.</p>
+{% endif %}
