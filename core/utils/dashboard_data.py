@@ -5,6 +5,7 @@ from plaid_link.models import Account, Transaction
 from core.models import Budget
 from core.models import AccountBalanceSnapshot
 from django.utils.timezone import now
+from collections import defaultdict
 
 def get_net_worth_data(user):
     accounts = Account.objects.filter(plaid_item__user=user)
@@ -80,3 +81,25 @@ def get_account_balance_deltas(user):
         })
 
     return deltas
+
+def get_top_categories_data(user, limit=3):
+    """Summarizes total spending per tag for the current month."""
+    now = timezone.now()
+    month_start = datetime(now.year, now.month, 1)
+
+    # Filter current month and only include tagged transactions
+    transactions = Transaction.objects.filter(
+        account__plaid_item__user=user,
+        date__gte=month_start,
+        tag__isnull=False
+    )
+
+    # Aggregate totals by tag
+    category_totals = defaultdict(float)
+    for txn in transactions:
+        category_totals[txn.tag.name] += float(txn.amount)
+
+    # Sort highest spending first and return top N
+    sorted_categories = sorted(category_totals.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+    return [{"name": name, "amount": total} for name, total in sorted_categories]

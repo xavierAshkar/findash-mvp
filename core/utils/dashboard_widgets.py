@@ -1,7 +1,7 @@
 # core/utils/dashboard_widgets.py
 from django.template.loader import render_to_string
 from plaid_link.models import Transaction as PlaidTransaction, Account as PlaidAccount
-from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data, get_account_balance_deltas
+from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data, get_account_balance_deltas, get_top_categories_data
 from core.models import DashboardBalancePreference
 from core.constants import (
     WIDGET_TRANSACTIONS,
@@ -9,6 +9,7 @@ from core.constants import (
     WIDGET_BALANCES,
     WIDGET_BUDGETS,
     WIDGET_BALANCE_CHANGE,
+    WIDGET_TOP_CATEGORIES,
 )
 
 
@@ -62,6 +63,14 @@ def get_widget_map(user, request):
             "content": render_to_string(
                 "core/dashboard/widgets/balance_change_widget.html",
                 {"deltas": get_account_balance_deltas(user)},
+                request=request
+            )
+        },
+        WIDGET_TOP_CATEGORIES: {
+            "title": "Top Spending Categories",
+            "content": render_to_string(
+                "core/dashboard/widgets/top_categories_widget.html",
+                {"categories": get_top_categories_data(user)},
                 request=request
             )
         },
