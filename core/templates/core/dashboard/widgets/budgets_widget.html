@@ -1,7 +1,35 @@
 {% for b in data %}
-  <p class="text-sm text-textSubtle">
-    {{ b.name }} – {{ b.percent|floatformat:0 }}% used
-  </p>
+  <div class="mb-4">
+    <div class="flex justify-between items-start">
+      <!-- Left: Budget name and tags -->
+      <div>
+        <p class="text-sm text-textSubtle font-semibold">{{ b.name }}</p>
+        {% if b.tags %}
+          <p class="text-xs text-textSubtle italic">
+            {{ b.tags|join:", " }}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- Right: Percent spent + amount -->
+      <div class="text-right">
+        <p class="text-sm text-textSubtle font-semibold">
+          {{ b.percent|floatformat:0 }}% used
+        </p>
+        <p class="text-xs text-textSubtle">
+          ${{ b.spent|floatformat:0 }} / ${{ b.limit|floatformat:0 }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="w-full h-2 bg-cardHeader rounded-full overflow-hidden mt-2">
+      <div
+        class="h-full transition-all duration-300"
+        style="width: {{ b.percent|floatformat:0 }}%; background-color: {{ b.color }};"
+      ></div>
+    </div>
+  </div>
 {% empty %}
   <p class="text-sm text-textSubtle">No budgets found for this month.</p>
 {% endfor %}

@@ -6,6 +6,7 @@ from core.constants import (
     WIDGET_NET_WORTH,
     WIDGET_BALANCES,
     WIDGET_BUDGETS,
+    WIDGET_BALANCE_CHANGE,
 )
 
 DEFAULT_WIDGETS = [

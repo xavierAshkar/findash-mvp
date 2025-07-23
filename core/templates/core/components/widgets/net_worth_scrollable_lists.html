@@ -1,0 +1,50 @@
+<!-- Assets Column -->
+<div class="flex-1 flex flex-col h-full min-w-0">
+  <div class="flex items-center justify-center text-base mb-1 h-[32px] gap-1 pb-[12px]">
+    <span class="font-medium">Assets:</span>
+    <span class="text-green-400">${{ net_worth_data.total_assets|floatformat:2 }}</span>
+  </div>
+
+  <div
+    class="overflow-y-auto pr-1 grow text-s text-textSubtle space-y-1 scrollbar-auto"
+    style="mask-image: linear-gradient(to bottom, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent);"
+  >
+    <ul class="space-y-1 pr-1">
+      {% for acc in net_worth_data.asset_accounts %}
+        <li class="flex justify-between">
+          <span class="txn-fade flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
+            {{ acc.name }}
+          </span>
+          <span class="text-green-300">${{ acc.current_balance|floatformat:2 }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Divider -->
+<div class="w-[1px] bg-cardHeader my-1"></div>
+
+<!-- Liabilities Column -->
+<div class="flex-1 flex flex-col h-full min-w-0">
+  <div class="flex items-center justify-center text-base mb-1 h-[32px] gap-1 pb-[12px]">
+    <span class="font-medium">Liabilities: </span>
+    <span class="text-red-400">${{ net_worth_data.total_liabilities|floatformat:2 }}</span>
+  </div>
+
+  <div
+    class="overflow-y-auto pl-1 grow text-s text-textSubtle space-y-1 scrollbar-auto"
+    style="mask-image: linear-gradient(to bottom, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent);"
+  >
+    <ul class="space-y-1 pl-1">
+      {% for acc in net_worth_data.credit_accounts %}
+        <li class="flex justify-between">
+          <span class="txn-fade flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
+            {{ acc.name }}
+          </span>
+          <span class="text-red-300">${{ acc.current_balance|floatformat:2 }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
