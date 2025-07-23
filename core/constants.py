@@ -1,9 +1,9 @@
 # core/constants.py
 WIDGET_TRANSACTIONS = "transactions"
-WIDGET_NET_WORTH = "net worth"
+WIDGET_NET_WORTH = "net_worth"
 WIDGET_BALANCES = "balances"
 WIDGET_BUDGETS = "budgets"
-WIDGET_BALANCE_CHANGE = "balance change"
+WIDGET_BALANCE_CHANGE = "balance_change"
 
 WIDGET_CHOICES = [
     (WIDGET_TRANSACTIONS, "Recent Transactions"),
