@@ -1,3 +1,5 @@
+{% load dashboard_extras %}
+
 {% if edit_mode and available_widgets %}
   <div class="mt-8 bg-cardBg p-4 rounded-xl shadow-card text-white">
     <h2 class="text-lg font-semibold mb-4">Add a Widget</h2>
@@ -13,7 +15,7 @@
         >
           <input type="hidden" name="widget_type" value="{{ widget_type }}">
           <button type="submit" class="px-4 py-2 rounded-md bg-accent hover:bg-opacity-70 transition">
-            + {{ widget_type|capfirst }}
+            + {{ widget_type|widget_title }}
           </button>
         </form>
       {% endfor %}
