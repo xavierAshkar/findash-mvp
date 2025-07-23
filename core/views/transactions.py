@@ -105,7 +105,7 @@ def add_transaction_view(request):
             )
             return redirect("core:transactions")
 
-    return render(request, "core/add_transaction.html", {
+    return render(request, "core/transactions/add_transaction.html", {
         "accounts": accounts,
         "user_tags": user_tags,
     })

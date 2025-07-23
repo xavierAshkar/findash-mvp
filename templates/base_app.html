@@ -11,32 +11,55 @@
     <!-- Load Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* Show scrollbar only while scrolling (WebKit only) */
       .scrollbar-auto {
-        scrollbar-width: auto; /* Firefox */
+        scrollbar-gutter: stable;
+        overflow-y: auto;
       }
 
+      /* Firefox */
+      .scrollbar-auto {
+        scrollbar-width: thin;
+        scrollbar-color: #2a2a2e transparent;
+      }
+
+      .scrollbar-auto:hover {
+        scrollbar-color: #3a3a40 transparent;
+      }
+
+      /* Chrome/Safari (WebKit) */
       .scrollbar-auto::-webkit-scrollbar {
         width: 8px;
       }
 
       .scrollbar-auto::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
+        background-color: #2a2a2e; /* barely visible against #202024 */
+        border-radius: 12px;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .scrollbar-auto:hover::-webkit-scrollbar-thumb {
+        background-color: #313035;
       }
 
       .scrollbar-auto::-webkit-scrollbar-track {
         background: transparent;
-      }
-
-      .scrollbar-auto {
-        scrollbar-gutter: stable;
       }
       .shadow-left-lg {
         box-shadow: -6px 0 12px -6px rgba(0, 0, 0, 0.25);
       }
       [x-cloak] {
         display: none !important;
+      }
+      .txn-fade {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .txn-fade.fade-active {
+        mask-image: linear-gradient(to right, black 80%, transparent);
+        -webkit-mask-image: linear-gradient(to right, black 80%, transparent);
       }
     </style>
     <!-- Define your custom colors -->
@@ -335,6 +358,29 @@
           window.location.reload();
         }
       });
+    </script>
+    <script>
+    function applyTxnFade() {
+      document.querySelectorAll('.txn-fade').forEach(function(el) {
+        el.classList.remove('fade-active');
+        if (el.scrollWidth > el.clientWidth - 10) {
+          el.classList.add('fade-active');
+        }
+      });
+    }
+
+    // Run on initial load
+    window.addEventListener("load", applyTxnFade);
+
+    // Run after HTMX swaps (if you use HTMX)
+    document.body.addEventListener("htmx:afterSwap", applyTxnFade);
+
+    // Run on window resize (for responsive layouts)
+    window.addEventListener("resize", function() {
+      // Use a timeout to avoid excessive calls during resize
+      clearTimeout(window._txnFadeTimeout);
+      window._txnFadeTimeout = setTimeout(applyTxnFade, 100);
+    });
     </script>
     {% block scripts %}{% endblock %}
   </body>

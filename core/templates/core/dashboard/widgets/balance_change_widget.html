@@ -1,0 +1,25 @@
+{% load core_extras %}
+{% if deltas %}
+  <ul class="space-y-2">
+    {% for item in deltas %}
+      <li class="flex justify-between items-center">
+        <span class="font-medium">{{ item.account.name }}</span>
+        <span>
+          {% if item.delta is not None %}
+            {% if item.delta > 0 %}
+              <span class="text-green-400">+${{ item.delta|floatformat:2 }} ({{ item.pct_change|floatformat:1 }}%)</span>
+            {% elif item.delta < 0 %}
+              <span class="text-red-400">-${{ item.delta|abs_val|floatformat:2 }} ({{ item.pct_change|floatformat:1 }}%)</span>
+            {% else %}
+              <span class="text-gray-400">No change</span>
+            {% endif %}
+          {% else %}
+            <span class="text-gray-500">No snapshot</span>
+          {% endif %}
+        </span>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-gray-400">No account data found.</p>
+{% endif %}
