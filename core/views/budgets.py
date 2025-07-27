@@ -8,6 +8,9 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from plaid_link.models import Transaction
 from ..models import Budget, Tag
+from dateutil.relativedelta import relativedelta
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.template.loader import render_to_string
 
 @login_required
 def budgets(request):
@@ -83,4 +86,50 @@ def budgets(request):
     return render(request, 'core/budgets/index.html', {
         "budget_data": budget_data,
         "user_tags": user_tags,
+        "budgets": budgets,
     })
+
+@login_required
+def budget_history(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest("Invalid request")
+
+    user = request.user
+    budget_id = request.POST.get("past-budget-select") or request.POST.get("budget_id")
+    month_str = request.POST.get("past-budget-month") or request.POST.get("month")
+
+    if not budget_id or not month_str:
+        return HttpResponseBadRequest("Missing data")
+
+    # Parse month/year from YYYY-MM format
+    year, month = map(int, month_str.split("-"))
+    month_start = datetime(year, month, 1)
+    next_month = month_start + relativedelta(months=1)
+
+    # Get budget and transactions
+    budget = Budget.objects.get(id=budget_id, user=user)
+    transactions = Transaction.objects.filter(
+        account__plaid_item__user=user,
+        date__gte=month_start,
+        date__lt=next_month
+    )
+
+    # Calculate spending
+    tag_ids = {tag.id for tag in budget.tags.all()}
+    total_spent = sum(abs(t.amount) for t in transactions if t.tag and t.tag.id in tag_ids)
+    percent = (float(total_spent) / float(budget.amount)) * 100 if budget.amount else 0
+
+    # Determine color (reuse pacing logic or simple thresholds)
+    color = "#ef4444" if total_spent >= float(budget.amount) else "#4ade80"
+
+    context = {
+        "budget": budget,
+        "spent": total_spent,
+        "percent": percent,
+        "color": color,
+        "transactions": [t for t in transactions if t.tag and t.tag.id in tag_ids],
+    }
+
+    # Render partial card
+    html = render_to_string("core/budgets/partials/_past_budget_card.html", context, request=request)
+    return HttpResponse(html)
