@@ -43,6 +43,9 @@ urlpatterns = [
     # Budgets view
     path('budgets/', views.budgets, name='budgets'),
 
+    # Budget history view
+    path("budgets/history/", views.budget_history, name="budget_history"),
+
     # Django built-in logout view
     path("logout/", views.logout_view, name="logout"),
     
