@@ -1,0 +1,21 @@
+<div class="p-4 rounded-lg shadow bg-cardBg border border-cardHeader text-white space-y-2">
+  <h3 class="text-lg font-bold">{{ budget.name }}</h3>
+  <p class="text-sm text-textSubtle">Spent: ${{ spent }} / ${{ budget.amount }} ({{ percent|floatformat:0 }}%)</p>
+
+  <div class="w-full h-3 bg-[#2A2A2F] rounded overflow-hidden">
+    <div class="h-full rounded" style="width: {{ percent|floatformat:0 }}%; background-color: {{ color }};"></div>
+  </div>
+
+  {% if transactions %}
+    <details class="mt-2 bg-[#2A2A2F] p-2 rounded text-sm">
+      <summary class="cursor-pointer text-textSubtle hover:text-white font-semibold">Transactions</summary>
+      <ul class="space-y-1 mt-2">
+        {% for txn in transactions %}
+          <li>{{ txn.date }} — {{ txn.name }} — ${{ txn.amount }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% else %}
+    <p class="text-textSubtle italic mt-2">No transactions for this month.</p>
+  {% endif %}
+</div>
