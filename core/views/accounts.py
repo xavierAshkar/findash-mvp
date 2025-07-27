@@ -12,53 +12,51 @@ from django.shortcuts import render
 
 @login_required
 def accounts_view(request):
-    """
-    Display the user's linked accounts and their balances.
-    - Fetch all accounts linked via Plaid for this user
-    - Separate accounts into asset and liability categories
-    - Calculate totals for each category
-    """
-
-    # Fetch all accounts linked via Plaid for this user
     accounts = Account.objects.filter(plaid_item__user=request.user)
 
-    # Separate out depository (asset) accounts
-    asset_accounts = [a for a in accounts if a.type == "depository"]
-
-    # Common subtypes shown separately
+    # Common subtypes
     common_subtypes = ["checking", "savings"]
 
-    # Group common assets
-    common_assets = {
-        subtype: [a for a in asset_accounts if a.subtype == subtype]
-        for subtype in common_subtypes
-    }
+    # Assets
+    checking_accounts = [a for a in accounts if a.type == "depository" and a.subtype == "checking"]
+    savings_accounts = [a for a in accounts if a.type == "depository" and a.subtype == "savings"]
 
-    # Remaining assets go in "Other Assets"
-    other_assets = [a for a in asset_accounts if a.subtype not in common_subtypes]
+    # Investments (Roth IRA, 401k, brokerage)
+    investment_accounts = [a for a in accounts if a.type == "investment"]
+
+    # Other assets: Depository but not checking/savings
+    other_assets = [
+        a for a in accounts
+        if a.type == "depository" and a.subtype not in common_subtypes
+    ]
+
+    # Liabilities (credit cards, loans)
+    credit_accounts = [a for a in accounts if a.type == "credit"]
 
     # Totals
-    total_checking = sum(Decimal(a.current_balance) for a in common_assets.get("checking", []))
-    total_savings = sum(Decimal(a.current_balance) for a in common_assets.get("savings", []))
+    total_checking = sum(Decimal(a.current_balance) for a in checking_accounts)
+    total_savings = sum(Decimal(a.current_balance) for a in savings_accounts)
+    total_investments = sum(Decimal(a.current_balance) for a in investment_accounts)
     total_other = sum(Decimal(a.current_balance) for a in other_assets)
-    total_assets = total_checking + total_savings + total_other
 
-    # Liabilities
-    credit_card_accounts = [a for a in accounts if a.type == "credit"]
-    total_credit = sum(Decimal(a.current_balance) for a in credit_card_accounts)
+    total_assets = total_checking + total_savings + total_investments + total_other
+    total_credit = sum(Decimal(a.current_balance) for a in credit_accounts)
     total_liabilities = total_credit
     net_worth = total_assets + total_liabilities
 
     return render(request, "core/accounts/index.html", {
-        "accounts": accounts,
-        "common_assets": common_assets,
+        "checking_accounts": checking_accounts,
+        "savings_accounts": savings_accounts,
+        "investment_accounts": investment_accounts,
         "other_assets": other_assets,
-        "credit_accounts": credit_card_accounts,
+        "credit_accounts": credit_accounts,
         "total_checking": total_checking,
         "total_savings": total_savings,
+        "total_investments": total_investments,
         "total_other": total_other,
         "total_assets": total_assets,
         "total_credit": total_credit,
         "total_liabilities": total_liabilities,
         "net_worth": net_worth,
+        "accounts": accounts,  # if needed elsewhere
     })
