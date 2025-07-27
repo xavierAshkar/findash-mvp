@@ -1,11 +1,8 @@
 """
 core/views/budgets.py
-
-Handles:
-- Budgets view shown from left sidebar
 """
-
 from datetime import datetime
+import calendar
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -16,6 +13,7 @@ from ..models import Budget, Tag
 def budgets(request):
     user = request.user
 
+    # Handle new budget creation
     if request.method == "POST":
         name = request.POST.get("name")
         tag_ids = request.POST.getlist("tags")
@@ -29,10 +27,14 @@ def budgets(request):
         budget.tags.set(tag_ids)
         return redirect('core:budgets')
 
-    budgets = Budget.objects.filter(user=user)
+    # Time calculations
     now = timezone.now()
     month_start = datetime(now.year, now.month, 1)
+    days_in_month = calendar.monthrange(now.year, now.month)[1]
+    today = now.day
 
+    # Pull budgets + transactions
+    budgets = Budget.objects.filter(user=user)
     transactions = Transaction.objects.filter(
         account__plaid_item__user=user,
         date__gte=month_start
@@ -43,23 +45,27 @@ def budgets(request):
         matching_tags = budget.tags.all()
         tag_ids = {tag.id for tag in matching_tags}
 
+        # Calculate spending
         total_spent = 0
         included_txns = []
-
         for t in transactions:
             if t.tag and t.tag.id in tag_ids:
-                total_spent += t.amount
+                total_spent += abs(t.amount)  # use absolute value
                 included_txns.append(t)
 
+        # Percent spent overall
+        percent = (float(total_spent) / float(budget.amount)) if budget.amount else 0
 
-        percent = float(total_spent) / float(budget.amount) if budget.amount else 0
+        # Expected pace by today
+        expected_spent_by_today = float(budget.amount) * (today / days_in_month)
 
-        if percent >= 1.0:
-            color = "#ef4444"  # red
-        elif percent >= 0.75:
-            color = "#facc15"  # yellow
+        # Color logic: pacing-based
+        if total_spent >= float(budget.amount):
+            color = "#ef4444"  # red (over budget)
+        elif total_spent > expected_spent_by_today:
+            color = "#facc15"  # yellow (spending too fast)
         else:
-            color = "#4ade80"  # green
+            color = "#4ade80"  # green (on track)
 
         budget_data.append({
             "name": budget.name,
@@ -71,6 +77,7 @@ def budgets(request):
             "color": color,
         })
 
+    # Tags for modal form
     user_tags = Tag.objects.filter(user=user)
 
     return render(request, 'core/budgets/index.html', {
