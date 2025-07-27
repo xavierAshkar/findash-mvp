@@ -13,6 +13,7 @@ from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid_link.models import PlaidItem, Account, Transaction
 from plaid_link.utils import get_plaid_client
 import traceback
+from core.utils.tags import auto_tag_transaction
 
 @require_POST
 @login_required
@@ -61,7 +62,7 @@ def fetch_transactions(request):
 
             # Loop through each transaction and save or update in the database
             for txn in transactions:
-                Transaction.objects.update_or_create(
+                txn_obj, created = Transaction.objects.update_or_create(
                     transaction_id=txn["transaction_id"],
                     defaults={
                         "account": account_map.get(txn["account_id"]),
@@ -74,8 +75,13 @@ def fetch_transactions(request):
                         "payment_channel": txn.get("payment_channel"),
                     }
                 )
-                # Increment count of created transactions
+
+                # Auto-tag if no manual tag was set
+                if txn_obj.tag is None:
+                    auto_tag_transaction(request.user, txn_obj)
+
                 created_count += 1
+
 
         # Return success response with count of transactions fetched
         return JsonResponse({"status": "success", "count": created_count})
