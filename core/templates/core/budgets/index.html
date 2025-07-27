@@ -6,89 +6,67 @@
 {% endblock %}
 
 {% block content %}
-  <!-- Add Budget Form -->
-  <form method="post" class="mb-8 bg-cardHeader p-6 rounded-lg shadow space-y-4">
-    {% csrf_token %}
-
-    <div>
-      <label class="block mb-1 font-semibold text-white">Name</label>
-      <input type="text" name="name"
-             class="w-full rounded px-3 py-2 bg-primaryBg text-white border border-gray-600"
-             required>
-    </div>
-
-    <div>
-      <label class="block mb-1 font-semibold text-white">Tags</label>
-      <select name="tags" multiple
-              class="w-full rounded px-3 py-2 bg-primaryBg text-white border border-gray-600">
-        {% for tag in user_tags %}
-          <option value="{{ tag.id }}">{{ tag.name }}</option>
-        {% endfor %}
-      </select>
-      <p class="text-xs text-textSubtle mt-1">Hold Ctrl or Cmd to select multiple.</p>
-    </div>
-
-    <div>
-      <label class="block mb-1 font-semibold text-white">Monthly Budget Amount ($)</label>
-      <input type="number" name="amount" step="0.01"
-             class="w-full rounded px-3 py-2 bg-primaryBg text-white border border-gray-600"
-             required>
-    </div>
-
-    <button type="submit"
-            class="bg-accent text-white font-semibold px-4 py-2 rounded hover:bg-opacity-80 transition">
-      Add Budget
-    </button>
-  </form>
-
-  <!-- Budget Display -->
-  {% for budget in budget_data %}
-    <div class="mb-6 p-4 rounded-lg shadow bg-cardBg text-white border border-cardHeader">
-      <h2 class="text-xl font-bold mb-1">{{ budget.name }}</h2>
-
-      <p class="text-sm text-textSubtle mb-2">
-        Tags:
-        {% for tag in budget.tags %}
-          <span class="inline-block bg-accent text-white px-2 py-1 rounded text-xs mr-1">{{ tag.name }}</span>
-        {% empty %}
-          <span class="text-textSubtle italic">No tags</span>
-        {% endfor %}
-      </p>
-
-      <div class="flex justify-between text-sm mb-1">
-        <span>Spent: ${{ budget.spent }}</span>
-        <span>Budgeted: ${{ budget.amount }}</span>
-      </div>
-
-      <!-- Progress Bar -->
-      <div class="w-full h-3 bg-[#2A2A2F] rounded overflow-hidden">
-        <div class="h-full transition-all duration-300 rounded"
-             style="width: {{ budget.percent|floatformat:0 }}%; background-color: {{ budget.color }};">
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {% for budget in budget_data %}
+      <!-- Budget Card -->
+      <div class="p-5 rounded-lg shadow bg-cardBg border border-cardHeader flex flex-col gap-3">
+        <!-- Name + Amount -->
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold">{{ budget.name }}</h2>
+          <span class="text-sm text-textSubtle">${{ budget.amount }}</span>
         </div>
-      </div>
 
-      <!-- Matching Transactions -->
-      <details class="mt-4 bg-[#2A2A2F] p-3 rounded text-sm">
-        <summary class="cursor-pointer text-textSubtle hover:text-white font-semibold mb-2">
-          Transactions counted in this budget
-        </summary>
+        <!-- Progress Bar -->
+        <div class="w-full h-3 bg-[#2A2A2F] rounded overflow-hidden">
+          <div class="h-full transition-all duration-300 rounded"
+               style="width: {{ budget.percent|floatformat:0 }}%; background-color: {{ budget.color }};">
+          </div>
+        </div>
 
-        {% if budget.transactions %}
-          <ul class="space-y-1 mt-2">
-            {% for txn in budget.transactions %}
-              <li class="border-b border-[#444] pb-1">
-                {{ txn.date }} — <span class="font-medium">{{ txn.name }}</span>
-                — <span class="text-green-400">${{ txn.amount }}</span>
-                {% if txn.user_tag %} (tagged: {{ txn.user_tag.name }}){% endif %}
-              </li>
+        <!-- Progress Text -->
+        <p class="text-sm text-textSubtle">
+          ${{ budget.spent }} spent ({{ budget.percent|floatformat:0 }}%)
+        </p>
+
+        <!-- Tags -->
+        {% if budget.tags %}
+          <div class="flex flex-wrap gap-1">
+            {% for tag in budget.tags %}
+              <span class="bg-accent px-2 py-1 text-xs rounded">{{ tag.name }}</span>
             {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-textSubtle italic mt-2">No transactions matched this budget.</p>
+          </div>
         {% endif %}
-      </details>      
-    </div>
-  {% empty %}
-    <p class="text-textSubtle">No budgets yet.</p>
-  {% endfor %}
+
+        <!-- Matching Transactions -->
+        <details class="mt-2 bg-[#2A2A2F] p-3 rounded text-sm">
+          <summary class="cursor-pointer text-textSubtle hover:text-white font-semibold">
+            Transactions
+          </summary>
+          {% if budget.transactions %}
+            <ul class="space-y-1 mt-2">
+              {% for txn in budget.transactions %}
+                <li class="border-b border-[#444] pb-1">
+                  {{ txn.date }} — <span class="font-medium">{{ txn.name }}</span>
+                  — <span class="text-green-400">${{ txn.amount }}</span>
+                  {% if txn.user_tag %} (tagged: {{ txn.user_tag.name }}){% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-textSubtle italic mt-2">No transactions matched this budget.</p>
+          {% endif %}
+        </details>
+      </div>
+    {% empty %}
+      <!-- Empty State -->
+      <div class="col-span-full flex flex-col items-center justify-center text-center py-12">
+        <p class="text-textSubtle mb-4">No budgets yet.</p>
+        <button
+          class="bg-accent text-white font-semibold px-4 py-2 rounded hover:bg-opacity-80 transition"
+        >
+          + Add Budget
+        </button>
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
