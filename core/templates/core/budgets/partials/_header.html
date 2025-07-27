@@ -3,13 +3,8 @@
     <h1 class="text-[32px] font-bold">Budgets</h1>
 
 
-    <div class="flex gap-[12px] ">
-      <a
-        disabled
-        class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
-      >
-        + Add budget
-      </a>
+    <div class="flex gap-[12px]">
+      {% include "core/budgets/partials/_add_modal.html" %}
     </div>
   </div>
 </header>

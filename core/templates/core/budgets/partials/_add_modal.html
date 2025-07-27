@@ -1,0 +1,77 @@
+<div 
+  x-data="{ open: false }" 
+  @keydown.escape.window="open = false" 
+  class="relative"
+>
+  <!-- Trigger Button -->
+  <button 
+    @click="open = true"
+    class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition"
+  >
+    + Add Budget
+  </button>
+
+  <!-- Modal Overlay -->
+  <div 
+    x-show="open"
+    x-transition
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <!-- Modal Content -->
+    <div 
+      @click.outside="open = false"
+      class="bg-cardHeader p-6 rounded-lg shadow-lg w-full max-w-md space-y-4"
+    >
+      <h2 class="text-xl font-bold text-white mb-2">Add Budget</h2>
+
+      <form method="post" action="{% url 'core:budgets' %}" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- Name -->
+        <div>
+          <label class="block mb-1 font-semibold text-white">Name</label>
+          <input type="text" name="name"
+                 class="w-full rounded px-3 py-2 bg-primaryBg text-white border border-gray-600"
+                 required>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <label class="block mb-1 font-semibold text-white">Tags</label>
+          <select name="tags" multiple
+                  class="w-full rounded px-3 py-2 bg-primaryBg text-white border border-gray-600">
+            {% for tag in user_tags %}
+              <option value="{{ tag.id }}">{{ tag.name }}</option>
+            {% endfor %}
+          </select>
+          <p class="text-xs text-textSubtle mt-1">Hold Ctrl or Cmd to select multiple.</p>
+        </div>
+
+        <!-- Amount -->
+        <div>
+          <label class="block mb-1 font-semibold text-white">Monthly Budget Amount ($)</label>
+          <input type="number" name="amount" step="0.01"
+                 class="w-full rounded px-3 py-2 bg-primaryBg text-white border border-gray-600"
+                 required>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end gap-2">
+          <button 
+            type="button" 
+            @click="open = false"
+            class="px-4 py-2 rounded bg-[#444] text-white hover:bg-[#555] transition"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit"
+            class="bg-accent text-white font-semibold px-4 py-2 rounded hover:bg-opacity-80 transition"
+          >
+            Add
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
