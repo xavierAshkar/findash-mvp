@@ -28,7 +28,7 @@ def create_link_token(request):
     request_data = LinkTokenCreateRequest(
         user=user,
         client_name="Findash MVP",
-        products=[Products("transactions")],
+        products=[Products("transactions"), Products("investments")],
         country_codes=[CountryCode("US")],
         language='en',
     )

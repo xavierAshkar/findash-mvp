@@ -14,9 +14,9 @@
     x-data="{
       showOther: false,
       total: {{ total_assets }},
-      base: {{ total_checking|add:total_savings }},
+      base: {{ total_checking|add:total_savings|add:total_investments }},
       other: {{ total_other }}
-    }" 
+    }"
     class="w-1/2 flex flex-col gap-[18px]"
   >
 
@@ -34,14 +34,45 @@
     </div>
 
     <!-- Checking -->
-    {% if common_assets.checking %}
-      {% include "core/components/account_card.html" with subtype="checking" asset_group=common_assets.checking %}
+    {% if checking_accounts %}
+      {% include "core/components/account_card.html" with subtype="checking" asset_group=checking_accounts %}
     {% endif %}
 
     <!-- Savings -->
-    {% if common_assets.savings %}
-      {% include "core/components/account_card.html" with subtype="savings" asset_group=common_assets.savings %}
+    {% if savings_accounts %}
+      {% include "core/components/account_card.html" with subtype="savings" asset_group=savings_accounts %}
     {% endif %}
+
+    <!-- Investments -->
+    {% if investment_accounts %}
+    <div class="w-full rounded-xl shadow-card overflow-hidden">
+      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Investments</h3>
+          <p class="text-sm text-green-500">
+            +X.X% <span class="text-textSubtle ml-2">1 month change</span>
+          </p>
+        </div>
+        <p class="text-lg font-semibold text-white">
+          ${{ total_investments|floatformat:2 }}
+        </p>
+      </div>
+      <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
+        {% for account in investment_accounts %}
+          <li class="flex justify-between items-center">
+            <div>
+              <p class="text-base text-white">{{ account.name }}</p>
+              <p class="text-sm text-textSubtle">
+                •••• {{ account.mask }} · <span class="capitalize">{{ account.subtype }}</span>
+              </p>
+            </div>
+            <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
 
     <!-- Other Assets Toggle -->
     {% if other_assets %}
