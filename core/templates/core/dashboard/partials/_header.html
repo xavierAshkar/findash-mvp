@@ -15,7 +15,7 @@
         htmx.ajax('GET', `{% url 'core:dashboard' %}?partial=chooser`, {target: '#widget-chooser'});"
     >
       {% csrf_token %}
-      <button type="submit" class="px-4 py-2 rounded-md bg-accent hover:bg-opacity-70 transition">
+      <button type="submit" class="text-[16px] px-[12px] py-[8px] font-semibold rounded-md bg-accent text-white hover:bg-opacity-70 transition">
         {% if edit_mode %}Done Editing{% else %}Edit Widgets{% endif %}
       </button>
     </form>
