@@ -13,6 +13,8 @@ from ..models import Tag
 from collections import OrderedDict
 from decimal import Decimal
 from django.db.models import Q
+from django.template.loader import render_to_string
+from core.utils.tags import auto_tag_transaction
 
 @login_required
 def transactions_view(request):
@@ -48,23 +50,28 @@ def transactions_view(request):
     if max_amount:
         transactions = transactions.filter(amount__lte=Decimal(max_amount))
 
-    # Tag or category filter
-    tag = params.get("tag")
-    if tag:
-        transactions = transactions.filter(
-            Q(tag__name__icontains=tag) | Q(category_main__icontains=tag)
-        )
+    # Tag or category filter (comma-separated)
+    tag_input = params.get("tag")
+    tag = None
+    if tag_input:
+        tag_list = [t.strip() for t in tag_input.split(",") if t.strip()]
+        if tag_list:
+            tag_query = Q()
+            for t in tag_list:
+                tag_query |= Q(tag__name__icontains=t) | Q(category_main__icontains=t)
+            transactions = transactions.filter(tag_query)
+            tag = tag_input  # preserve raw input for UI
 
     # Sort and group
     transactions = transactions.order_by("-date", "-id")
     grouped_transactions = OrderedDict()
-
     for txn in transactions:
         grouped_transactions.setdefault(txn.date, []).append(txn)
 
     user_tags = Tag.objects.filter(user=request.user)
 
-    return render(request, "core/transactions/index.html", {
+    # Shared context
+    context = {
         "grouped_transactions": grouped_transactions,
         "user_accounts": user_accounts,
         "user_tags": user_tags,
@@ -76,7 +83,14 @@ def transactions_view(request):
             "min_amount": min_amount,
             "max_amount": max_amount,
         }
-    })
+    }
+
+    # Return partial if HTMX request
+    if request.headers.get("HX-Request"):
+        return render(request, "core/transactions/partials/_transaction_list.html", context)
+
+    # Otherwise return full page
+    return render(request, "core/transactions/index.html", context)
 
 @login_required
 def add_transaction_view(request):
@@ -95,7 +109,7 @@ def add_transaction_view(request):
 
         if all([name, amount, date, account_id]):
             account = get_object_or_404(Account, id=account_id, plaid_item__user=request.user)
-            Transaction.objects.create(
+            txn = Transaction.objects.create(
                 name=name,
                 amount=Decimal(amount),
                 date=date,
@@ -103,7 +117,13 @@ def add_transaction_view(request):
                 tag=tag,
                 account=account,
             )
+
+            # Auto-tag if no manual tag was selected
+            if txn.tag is None:
+                auto_tag_transaction(user, txn)
+
             return redirect("core:transactions")
+
 
     return render(request, "core/transactions/add_transaction.html", {
         "accounts": accounts,

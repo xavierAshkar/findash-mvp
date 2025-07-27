@@ -1,0 +1,47 @@
+{% if grouped_transactions %}
+  <div class="space-y-6">
+    {% for date, txns in grouped_transactions.items %}
+      <div>
+        <h2 class="text-sm font-semibold text-textSubtle uppercase tracking-wide mb-2">
+          {{ date|date:"F j, Y" }}
+        </h2>
+
+        <ul class="space-y-1">
+          {% for txn in txns %}
+            <li class="bg-cardBg rounded px-4 py-3 flex items-center justify-between text-sm text-textMain hover:bg-hoverBg transition">
+              
+              <!-- Transaction Name -->
+              <div class="flex-1 truncate">{{ txn.name }}</div>
+
+              <!-- Tag Form -->
+              <form method="post" action="{% url 'core:tag_transaction' txn.id %}" class="mx-4">
+                {% csrf_token %}
+                <select name="tag" class="bg-[#2A2A2F] border-none text-white px-2 py-[2px] rounded text-xs w-28"
+                        onchange="this.form.submit()">
+                  <option value="">—</option>
+                  {% for tag in user_tags %}
+                    <option value="{{ tag.id }}" {% if txn.tag and tag.id == txn.tag.id %}selected{% endif %}>
+                      {{ tag.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </form>
+
+              <!-- Amount -->
+              <div class="w-[80px] text-right {% if txn.amount > 0 %}text-red-400{% else %}text-green-400{% endif %}">
+                ${{ txn.amount }}
+              </div>
+
+              <!-- Account Name -->
+              <div class="w-[120px] text-right text-textSubtle ml-4 truncate">
+                {{ txn.account.name }}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-textSubtle">You don’t have any transactions to show.</p>
+{% endif %}

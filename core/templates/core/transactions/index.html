@@ -8,9 +8,18 @@
 
 {% block toolbar %}
 <div class="sticky top-[72px] px-[24px] z-20 bg-primaryBg">
-  <div class="h-[60px] bg-cardHeader rounded-xl shadow-card flex items-center justify-center">
-    <form method="get" class="flex flex-wrap gap-3 items-center text-sm text-white">
-      <select name="account_id" onchange="this.form.submit()" class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm">
+  <div class="bg-cardHeader rounded-xl shadow-card p-3">
+    <form
+      hx-get="{% url 'core:transactions' %}"
+      hx-target="#transaction-list"
+      hx-push-url="true"
+      hx-include="this"
+      hx-trigger="change, keyup delay:500ms"
+      class="flex flex-wrap gap-2 md:gap-3 items-center text-sm text-white">
+
+      <!-- account_id -->
+      <select name="account_id"
+              class="flex-1 min-w-[140px] bg-[#2A2A2F] rounded px-2 py-1">
         <option value="">All accounts</option>
         {% for account in user_accounts %}
           <option value="{{ account.id }}" {% if selected_account_id == account.id %}selected{% endif %}>
@@ -19,32 +28,35 @@
         {% endfor %}
       </select>
 
-      <input type="text" name="tag" placeholder="Tag or Category"
+      <!-- tag -->
+      <input type="text" name="tag"
+            placeholder="Tag or Category"
             value="{{ filters.tag|default:'' }}"
-            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm" />
+            class="flex-1 min-w-[140px] bg-[#2A2A2F] rounded px-2 py-1" />
 
+      <!-- date / amount filters -->
       <input type="date" name="start_date"
             value="{{ filters.start_date|default:'' }}"
-            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm" />
-
+            class="flex-1 min-w-[140px] bg-[#2A2A2F] rounded px-2 py-1" />
       <input type="date" name="end_date"
             value="{{ filters.end_date|default:'' }}"
-            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm" />
+            class="flex-1 min-w-[140px] bg-[#2A2A2F] rounded px-2 py-1" />
 
       <input type="number" step="0.01" name="min_amount" placeholder="Min $"
             value="{{ filters.min_amount|default:'' }}"
-            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm w-[80px]" />
+            class="w-[100px] bg-[#2A2A2F] rounded px-2 py-1" />
 
       <input type="number" step="0.01" name="max_amount" placeholder="Max $"
             value="{{ filters.max_amount|default:'' }}"
-            class="bg-[#2A2A2F] text-white rounded px-2 py-1 text-sm w-[80px]" />
+            class="w-[100px] bg-[#2A2A2F] rounded px-2 py-1" />
 
-      <button type="submit" class="px-3 py-1 bg-accent text-white rounded hover:bg-opacity-80 transition">
-        Filter
-      </button>
-
-      <a href="{% url 'core:transactions' %}"
-        class="px-3 py-1 bg-hoverBg text-white rounded hover:bg-opacity-70 transition border border-cardHeader">
+      <!-- Clear button -->
+      <a href="#"
+        hx-get="{% url 'core:transactions' %}"
+        hx-target="#transaction-list"
+        hx-push-url="true"
+        onclick="this.closest('form').reset();"
+        class="px-3 py-1 bg-hoverBg rounded border border-cardHeader hover:bg-opacity-70">
         Clear
       </a>
     </form>
@@ -54,52 +66,7 @@
 {% endblock %}
 
 {% block content %}
-  {% if grouped_transactions %}
-    <div class="space-y-6">
-      {% for date, txns in grouped_transactions.items %}
-        <div>
-          <h2 class="text-sm font-semibold text-textSubtle uppercase tracking-wide mb-2">
-            {{ date|date:"F j, Y" }}
-          </h2>
-
-          <ul class="space-y-1">
-            {% for txn in txns %}
-              <li class="bg-cardBg rounded px-4 py-3 flex items-center justify-between text-sm text-textMain hover:bg-hoverBg transition">
-                
-                <!-- Transaction Name -->
-                <div class="flex-1 truncate">{{ txn.name }}</div>
-
-                <!-- Tag Form -->
-                <form method="post" action="{% url 'core:tag_transaction' txn.id %}" class="mx-4">
-                  {% csrf_token %}
-                  <select name="tag" class="bg-[#2A2A2F] border-none text-white px-2 py-[2px] rounded text-xs w-28"
-                          onchange="this.form.submit()">
-                    <option value="">—</option>
-                    {% for tag in user_tags %}
-                      <option value="{{ tag.id }}" {% if txn.tag and tag.id == txn.tag.id %}selected{% endif %}>
-                        {{ tag.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
-          
-                </form>
-
-                <!-- Amount -->
-                <div class="w-[80px] text-right {% if txn.amount > 0 %}text-red-400{% else %}text-green-400{% endif %}">
-                  ${{ txn.amount }}
-                </div>
-
-                <!-- Account Name -->
-                <div class="w-[120px] text-right text-textSubtle ml-4 truncate">
-                  {{ txn.account.name }}
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p class="text-textSubtle">You don’t have any transactions to show.</p>
-  {% endif %}
+  <div id="transaction-list">
+    {% include "core/transactions/partials/_transaction_list.html" %}
+  </div>
 {% endblock %}
