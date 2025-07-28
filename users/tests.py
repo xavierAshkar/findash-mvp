@@ -53,7 +53,7 @@ class UserAuthTests(TestCase):
     def test_login_with_valid_credentials(self):
         User.objects.create_user(email='user@test.com', full_name='Test User', password='securepass123')
         response = self.client.post(self.login_url, {
-            'username': 'user@test.com',
+            'email': 'user@test.com',
             'password': 'Securepass123!'
         })
         self.assertEqual(response.status_code, 302)
