@@ -11,6 +11,16 @@ from django.contrib.auth import login
 from django.contrib import messages  
 from .forms import CustomUserCreationForm
 
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
+from .tokens import email_verification_token
+
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from .models import CustomUser
+
 def home(request):
     """
     Render the homepage (accessible to all users).
@@ -19,31 +29,30 @@ def home(request):
 
 
 def register(request):
-    """
-    Handle user registration.
-    
-    - On GET: display a blank registration form
-    - On POST: validate and save the user, log them in,
-      and redirect to the dashboard if successful
-    """
     if request.method == "POST":
-        # Create a form instance with submitted POST data
         form = CustomUserCreationForm(request.POST)
-
-        # Validate the form (built-in Django validation + custom logic)
         if form.is_valid():
-            # Save the new user to the database
-            user = form.save()
+            user = form.save(commit=False)
 
-            # Log the user in after successful registration
+            # Auto-verify for v1.0.0
+            user.is_verified = True
+            user.save()
+
+            
             login(request, user)
-            messages.success(request, "Registration successful. Welcome!")
-
-            # Redirect user to link accounts page
+            messages.success(request, "Account created and verified! Welcome to Findash.")
             return redirect('plaid:link_account')
     else:
-        # If GET request, instantiate a blank registration form
         form = CustomUserCreationForm()
 
-    # Render the registration template with the form (either blank or with errors)
     return render(request, "registration/register.html", {"form": form})
+
+
+def verify_email(request, uid, token):
+    user = get_object_or_404(CustomUser, pk=uid)
+    if email_verification_token.check_token(user, token):
+        user.is_verified = True
+        user.save()
+        messages.success(request, "Your email is verified! You can log in now.")
+        return redirect('users:login')
+    return HttpResponseBadRequest("Invalid or expired verification link.")
