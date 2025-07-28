@@ -25,7 +25,14 @@
       <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
         <div>
           <h3 class="text-lg font-semibold text-white">Assets</h3>
-          <p class="text-sm text-green-500">+X.X% <span class="text-textSubtle ml-2">1 month change</span></p>
+          <p class="text-sm {% if assets_pct is not None and assets_pct >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+            {% if assets_pct is not None %}
+              {{ assets_pct|floatformat:1 }}%
+            {% else %}
+              N/A
+            {% endif %}
+            <span class="text-textSubtle ml-2">1 month change</span>
+          </p>
         </div>
         <p class="text-lg font-semibold text-white">
           $<span x-text="(showOther ? total : base).toFixed(2)"></span>
@@ -35,78 +42,24 @@
 
     <!-- Checking -->
     {% if checking_accounts %}
-      {% include "core/components/account_card.html" with subtype="checking" asset_group=checking_accounts %}
+      {% include "core/components/account_card.html" with subtype="checking" asset_group=checking_accounts pct=checking_pct %}
     {% endif %}
 
     <!-- Savings -->
     {% if savings_accounts %}
-      {% include "core/components/account_card.html" with subtype="savings" asset_group=savings_accounts %}
+      {% include "core/components/account_card.html" with subtype="savings" asset_group=savings_accounts pct=savings_pct %}
     {% endif %}
 
     <!-- Investments -->
     {% if investment_accounts %}
-    <div class="w-full rounded-xl shadow-card overflow-hidden">
-      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
-        <div>
-          <h3 class="text-lg font-semibold text-white">Investments</h3>
-          <p class="text-sm text-green-500">
-            +X.X% <span class="text-textSubtle ml-2">1 month change</span>
-          </p>
-        </div>
-        <p class="text-lg font-semibold text-white">
-          ${{ total_investments|floatformat:2 }}
-        </p>
-      </div>
-      <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
-        {% for account in investment_accounts %}
-          <li class="flex justify-between items-center">
-            <div>
-              <p class="text-base text-white">{{ account.name }}</p>
-              <p class="text-sm text-textSubtle">
-                •••• {{ account.mask }} · <span class="capitalize">{{ account.subtype }}</span>
-              </p>
-            </div>
-            <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
+      {% include "core/components/account_card.html" with subtype="investments" asset_group=investment_accounts pct=investment_pct %}
     {% endif %}
-
 
     <!-- Other Assets Toggle -->
     {% if other_assets %}
-      <!-- Entire x-show block only for the expandable section -->
       <div x-show="showOther" x-transition>
-        <div class="w-full rounded-xl shadow-xl overflow-hidden">
-          <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
-            <div>
-              <h3 class="text-lg font-semibold text-white">Other Assets</h3>
-              <p class="text-sm text-green-500">
-                +X.X% <span class="text-textSubtle ml-2">1 month change</span>
-              </p>
-            </div>
-            <p class="text-lg font-semibold text-white">
-              ${{ total_other|floatformat:2 }}
-            </p>
-          </div>
-          <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
-            {% for account in other_assets %}
-              <li class="flex justify-between items-center">
-                <div>
-                  <p class="text-base text-white">{{ account.name }}</p>
-                  <p class="text-sm text-textSubtle">
-                    •••• {{ account.mask }} · <span class="capitalize">{{ account.subtype }}</span>
-                  </p>
-                </div>
-                <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
+        {% include "core/components/account_card.html" with subtype="other" asset_group=other_assets pct=None %}
       </div>
-
-      <!-- Toggle button -->
       <button
         @click="showOther = !showOther"
         class="text-sm text-accent mt-2 hover:underline"
@@ -116,7 +69,6 @@
     {% endif %}
   </div>
 
-
   <!-- Right Column (Liabilities) -->
   <div class="w-1/2 flex flex-col gap-[18px]">
 
@@ -125,33 +77,23 @@
       <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
         <div>
           <h3 class="text-lg font-semibold text-white">Liabilities</h3>
-          <p class="text-sm text-red-500">-X.X% <span class="text-textSubtle ml-2">1 month change</span></p>
+          <p class="text-sm {% if liabilities_pct is not None and liabilities_pct >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+            {% if liabilities_pct is not None %}
+              {{ liabilities_pct|floatformat:1 }}%
+            {% else %}
+              N/A
+            {% endif %}
+            <span class="text-textSubtle ml-2">1 month change</span>
+          </p>
         </div>
         <p class="text-lg font-semibold text-white">${{ total_liabilities|floatformat:2 }}</p>
       </div>
     </div>
 
     <!-- Credit Cards -->
-    <div class="w-full rounded-xl shadow-card overflow-hidden">
-      <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
-        <div>
-          <h3 class="text-lg font-semibold text-white">Credit Cards</h3>
-          <p class="text-sm text-red-500">-X.X% <span class="text-textSubtle ml-2">1 month change</span></p>
-        </div>
-        <p class="text-lg font-semibold text-white">${{ total_credit|floatformat:2 }}</p>
-      </div>
-      <ul class="bg-cardBg px-[16px] py-[12px] space-y-[12px]">
-        {% for account in credit_accounts %}
-          <li class="flex justify-between items-center">
-            <div>
-              <p class="text-base text-white">{{ account.name }}</p>
-              <p class="text-sm text-textSubtle">•••• {{ account.mask }}</p>
-            </div>
-            <p class="text-white text-base">${{ account.current_balance|floatformat:2 }}</p>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
+    {% if credit_accounts %}
+      {% include "core/components/account_card.html" with subtype="credit" asset_group=credit_accounts pct=credit_pct %}
+    {% endif %}
   </div>
 </div>
 {% else %}

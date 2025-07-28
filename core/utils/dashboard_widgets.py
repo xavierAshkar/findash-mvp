@@ -1,7 +1,8 @@
 # core/utils/dashboard_widgets.py
 from django.template.loader import render_to_string
 from plaid_link.models import Transaction as PlaidTransaction, Account as PlaidAccount
-from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data, get_account_balance_deltas, get_top_categories_data
+from core.utils.dashboard_data import get_net_worth_data, get_budget_widget_data, get_top_categories_data
+from core.utils.snapshots import get_account_balance_deltas
 from core.models import DashboardBalancePreference
 from core.constants import (
     WIDGET_TRANSACTIONS,

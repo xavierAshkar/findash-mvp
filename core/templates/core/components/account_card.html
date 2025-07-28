@@ -3,8 +3,13 @@
   <div class="bg-cardHeader px-[16px] py-[12px] flex justify-between items-center">
     <div>
       <h3 class="text-lg font-semibold text-white">{{ subtype|title }}</h3>
-      <p class="text-sm text-green-500">
-        +X.X% <span class="text-textSubtle ml-2">1 month change</span>
+      <p class="text-sm {% if pct is not None and pct >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+        {% if pct is not None %}
+          {{ pct|floatformat:1 }}%
+        {% else %}
+          N/A
+        {% endif %}
+        <span class="text-textSubtle ml-2">1 month change</span>
       </p>
     </div>
     <p class="text-lg font-semibold text-white">
