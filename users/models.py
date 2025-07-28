@@ -28,11 +28,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)  # NEW
     date_joined = models.DateTimeField(auto_now_add=True)
-
-    # Optional future fields
-    # income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    # credit_score_estimate = models.IntegerField(null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['full_name']
