@@ -24,7 +24,7 @@ jobs:
           --health-retries 5
 
     env:
-      DJANGO_SECRET_KEY: testkey
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
       PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
       PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
       FERNET_KEY: ${{ secrets.FERNET_KEY }}
