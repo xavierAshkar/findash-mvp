@@ -54,7 +54,7 @@ class UserAuthTests(TestCase):
         User.objects.create_user(email='user@test.com', full_name='Test User', password='securepass123')
         response = self.client.post(self.login_url, {
             'username': 'user@test.com',
-            'password': 'securepass123'
+            'password': 'Securepass123!'
         })
         self.assertEqual(response.status_code, 302)
 
