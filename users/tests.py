@@ -51,9 +51,9 @@ class UserAuthTests(TestCase):
 
     # Login with valid credentials redirects
     def test_login_with_valid_credentials(self):
-        User.objects.create_user(email='user@test.com', full_name='Test User', password='securepass123')
+        User.objects.create_user(email='user@test.com', full_name='Test User', password='Securepass123!')
         response = self.client.post(self.login_url, {
-            'email': 'user@test.com',
+            'username': 'user@test.com',
             'password': 'Securepass123!'
         })
         self.assertEqual(response.status_code, 302)
