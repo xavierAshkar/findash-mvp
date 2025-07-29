@@ -38,7 +38,7 @@ def register(request):
 
             login(request, user)
             messages.success(request, "Account created! Welcome to Findash.")
-            return redirect('core:dashboard')
+            return redirect('plaid:link_account')
         else:
             # Show clear duplicate email error
             if form.errors.get('email'):
