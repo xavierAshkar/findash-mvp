@@ -2,15 +2,27 @@
 {% load form_tags %}
 
 {% block content %}
-<!-- Centered registration card -->
-<div class="min-h-screen flex items-center justify-center px-4">
-  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+<div class="min-h-screen flex items-center justify-center px-4 bg-primaryBg">
+  <div class="bg-cardHeader p-8 rounded-xl shadow-lg w-full max-w-md text-textMain">
 
-    <!-- Header with dismiss link -->
+    <!-- Header -->
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Sign Up</h2>
-      <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600 text-xl">&times;</a>
+      <h2 class="text-2xl font-bold">Create Account</h2>
+      <a href="{% url 'home' %}" class="text-textSubtle hover:text-textMain text-xl">&times;</a>
     </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      <div class="mb-4 space-y-2">
+        {% for message in messages %}
+          <div class="p-2 rounded text-sm
+                      {% if message.tags == 'success' %}bg-green-700 text-white
+                      {% else %}bg-red-700 text-white{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
     <!-- Registration Form -->
     <form method="post" class="space-y-4">
@@ -18,16 +30,23 @@
 
       <!-- Email Field -->
       <div>
-        <label for="id_email" class="block text-sm font-medium text-gray-700">Email</label>
-        {{ form.email|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
+        <label for="id_email" class="block text-sm font-medium">Email</label>
+        {{ form.email|add_class:"mt-1 p-2 w-full rounded bg-primaryBg border border-hoverBorder" }}
+        {% for error in form.email.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
       </div>
 
       <!-- Full Name Field -->
       <div>
-        <label for="id_full_name" class="block text-sm font-medium text-gray-700">Full Name</label>
-        {{ form.full_name|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
+        <label for="id_full_name" class="block text-sm font-medium">Full Name</label>
+        {{ form.full_name|add_class:"mt-1 p-2 w-full rounded bg-primaryBg border border-hoverBorder" }}
+        {% for error in form.full_name.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
       </div>
 
+      <!-- Password & Confirm (Alpine.js) -->
       <div x-data="{
           password: '',
           confirmPassword: '',
@@ -48,66 +67,63 @@
           }
       }" class="space-y-2">
 
-        <!-- Password field with toggle -->
-        <label for="id_password1" class="block text-sm font-medium text-gray-700">Password</label>
+        <!-- Password -->
+        <label for="id_password1" class="block text-sm font-medium">Password</label>
         <div class="relative">
           <input :type="showPassword ? 'text' : 'password'" name="password1" id="id_password1"
-                x-model="password" x-init="checkPassword()" @input="checkPassword"
-                class="mt-1 p-2 block w-full border border-gray-300 rounded pr-10">
-
+                 x-model="password" x-init="checkPassword()" @input="checkPassword"
+                 class="mt-1 p-2 w-full rounded bg-primaryBg border border-hoverBorder pr-10">
           <button type="button" @click="showPassword = !showPassword"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-gray-500 hover:text-gray-700">
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-textSubtle hover:text-textMain">
             <span x-text="showPassword ? 'Hide' : 'Show'"></span>
           </button>
         </div>
 
         <!-- Requirements -->
         <ul class="text-xs space-y-1">
-          <li :class="req.length ? 'text-green-600' : 'text-red-500'">8+ characters</li>
-          <li :class="req.uppercase ? 'text-green-600' : 'text-red-500'">At least one uppercase letter</li>
-          <li :class="req.number ? 'text-green-600' : 'text-red-500'">At least one number</li>
-          <li :class="req.special ? 'text-green-600' : 'text-red-500'">At least one special character</li>
+          <li :class="req.length ? 'text-green-400' : 'text-red-400'">8+ characters</li>
+          <li :class="req.uppercase ? 'text-green-400' : 'text-red-400'">At least one uppercase letter</li>
+          <li :class="req.number ? 'text-green-400' : 'text-red-400'">At least one number</li>
+          <li :class="req.special ? 'text-green-400' : 'text-red-400'">At least one special character</li>
         </ul>
 
         <!-- Strength bar -->
-        <div x-show="password !== ''" class="h-2 rounded bg-gray-200 overflow-hidden">
-          <div class="h-full transition-all"
-              :style="{ width: strength + '%', backgroundColor: barColor }"></div>
+        <div x-show="password !== ''" class="h-2 rounded bg-gray-700 overflow-hidden">
+          <div class="h-full transition-all" :style="{ width: strength + '%', backgroundColor: barColor }"></div>
         </div>
 
-        <!-- Confirm Password field with toggle -->
-        <label for="id_password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+        <!-- Confirm Password -->
+        <label for="id_password2" class="block text-sm font-medium">Confirm Password</label>
         <div class="relative">
           <input :type="showConfirmPassword ? 'text' : 'password'" name="password2" id="id_password2"
-                x-model="confirmPassword"
-                class="mt-1 p-2 block w-full border border-gray-300 rounded pr-10">
-
-
+                 x-model="confirmPassword"
+                 class="mt-1 p-2 w-full rounded bg-primaryBg border border-hoverBorder pr-10">
           <button type="button" @click="showConfirmPassword = !showConfirmPassword"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-gray-500 hover:text-gray-700">
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-textSubtle hover:text-textMain">
             <span x-text="showConfirmPassword ? 'Hide' : 'Show'"></span>
           </button>
         </div>
 
         <!-- Match indicator -->
         <p x-show="password !== ''"
-          :class="password === confirmPassword ? 'text-green-600' : 'text-red-500'"
-          class="text-xs mt-1">
+           :class="password === confirmPassword ? 'text-green-400' : 'text-red-400'"
+           class="text-xs mt-1">
           <span x-text="password === confirmPassword ? 'Passwords match' : 'Passwords do not match'"></span>
         </p>
 
-        <!-- Submit button -->
+        <!-- Submit -->
         <button type="submit"
                 :disabled="strength < 100 || password !== confirmPassword"
-                class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-full bg-accent text-white py-2 rounded hover:bg-hoverBorder disabled:opacity-50">
           Sign Up
         </button>
       </div>
     </form>
+
     <!-- Link to Login -->
-    <p class="mt-4 text-sm text-center text-gray-600">
+    <p class="mt-4 text-sm text-center text-textSubtle">
       Already have an account?
-      <a href="{% url 'users:login' %}" class="text-blue-500 hover:underline">Login</a>
+      <a href="{% url 'users:login' %}" class="text-accent hover:underline">Login</a>
     </p>
 
   </div>

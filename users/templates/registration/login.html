@@ -4,45 +4,64 @@
 {% block content %}
 <!-- Centered login card layout -->
 <div class="min-h-screen flex items-center justify-center px-4">
-  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+  <div class="bg-cardHeader p-8 rounded-xl shadow-lg w-full max-w-md text-textMain">
 
     <!-- Header with close (home) link -->
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Login</h2>
-      <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600 text-xl">&times;</a>
+      <h2 class="text-2xl font-bold">Login</h2>
+      <a href="{% url 'home' %}" class="text-textSubtle hover:text-textMain text-xl">&times;</a>
     </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      <div class="mb-4 space-y-2">
+        {% for message in messages %}
+          <div class="p-2 rounded text-sm
+                      {% if message.tags == 'success' %}bg-green-700 text-white
+                      {% else %}bg-red-700 text-white{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
     <!-- Login Form -->
     <form method="post" class="space-y-4">
       {% csrf_token %}
 
-      <!-- Username (email) field -->
+      <!-- Email (username) field -->
       <div>
-        <label for="id_username" class="block text-sm font-medium text-gray-700">Email</label>
-        {{ form.username|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
+        <label for="id_username" class="block text-sm font-medium">Email</label>
+        {{ form.username|add_class:"mt-1 p-2 w-full rounded bg-primaryBg border border-hoverBorder" }}
+        {% for error in form.username.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
       </div>
 
       <!-- Password field -->
       <div>
-        <label for="id_password" class="block text-sm font-medium text-gray-700">Password</label>
-        {{ form.password|add_class:"mt-1 p-2 block w-full border border-gray-300 rounded" }}
+        <label for="id_password" class="block text-sm font-medium">Password</label>
+        {{ form.password|add_class:"mt-1 p-2 w-full rounded bg-primaryBg border border-hoverBorder" }}
+        {% for error in form.password.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
       </div>
 
-      <!-- Forgot Password (for future feature) -->
+      <!-- Forgot Password (future feature) -->
       <div class="text-right text-sm">
-        <a href="#" class="text-blue-500 hover:underline">Forgot password?</a>
+        <a href="#" class="text-accent hover:underline">Forgot password?</a>
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+      <button type="submit" class="w-full bg-accent text-white py-2 rounded hover:bg-hoverBorder">
         Login
       </button>
     </form>
 
     <!-- Link to Register -->
-    <p class="mt-4 text-sm text-center text-gray-600">
+    <p class="mt-4 text-sm text-center text-textSubtle">
       Don’t have an account?
-      <a href="{% url 'users:register' %}" class="text-blue-500 hover:underline">Sign up</a>
+      <a href="{% url 'users:register' %}" class="text-accent hover:underline">Sign up</a>
     </p>
 
   </div>

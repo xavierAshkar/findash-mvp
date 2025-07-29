@@ -1,14 +1,89 @@
 <!-- templates/base_public.html -->
 <!DOCTYPE html>
 <html lang="en">
+  {% load static %}
   <head>
     <meta charset="UTF-8" />
-    <title>{% block title %}FinDash{% endblock %}</title>
+    <title>{% block title %}Findash{% endblock %}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Load Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .scrollbar-auto {
+        scrollbar-gutter: stable;
+        overflow-y: auto;
+      }
+
+      /* Firefox */
+      .scrollbar-auto {
+        scrollbar-width: thin;
+        scrollbar-color: #2a2a2e transparent;
+      }
+
+      .scrollbar-auto:hover {
+        scrollbar-color: #3a3a40 transparent;
+      }
+
+      /* Chrome/Safari (WebKit) */
+      .scrollbar-auto::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .scrollbar-auto::-webkit-scrollbar-thumb {
+        background-color: #2a2a2e;
+        border-radius: 12px;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .scrollbar-auto:hover::-webkit-scrollbar-thumb {
+        background-color: #313035;
+      }
+
+      .scrollbar-auto::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
+
+    <!-- Tailwind config (same as base_app) -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            boxShadow: {
+              'card': '0 4px 4px rgba(0, 0, 0, 0.25)',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primaryBg: "#202024",
+              sidebarBg: "#101013",
+              cardHeader: "#313035",
+              cardBg: "#202024",
+              hoverBg: "#0A0A0C",
+              hoverBorder: "#78767E",
+              accent: "#6760A6",
+              textMain: "#ffffff",
+              textSubtle: "#78767E",
+            },
+          },
+        },
+      };
+    </script>
+
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
   </head>
-  <body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto px-4">{% block content %}{% endblock %}</div>
+
+  <body class="bg-primaryBg text-textMain">
+    <div class="container mx-auto px-4">
+      {% block content %}{% endblock %}
+    </div>
   </body>
 </html>
