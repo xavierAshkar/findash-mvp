@@ -3,23 +3,33 @@
 {% block title %}Link Your Bank{% endblock %}
 
 {% block content %}
-<!-- Plaid Link UI Card -->
-<div class="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
-  <h1 class="text-2xl font-bold mb-4">Connect your bank or credit card</h1>
+<div class="max-w-md mx-auto mt-20 p-6 bg-cardBg rounded-xl shadow-lg text-textMain">
+  <h1 class="text-2xl font-bold mb-4">Link a Bank or Credit Card</h1>
+  <p class="text-textSubtle mb-6">
+    Connect a bank account to view balances and transactions in Findash.
+  </p>
 
-  <!-- Trigger Plaid Link flow -->
-  <button id="link-button" class="bg-blue-600 text-white px-5 py-3 rounded hover:bg-blue-700">
+  <!-- Link Bank Button -->
+  <button
+    id="link-button"
+    class="bg-accent text-white px-5 py-3 rounded hover:bg-hoverBorder transition w-full"
+  >
     Link Your Bank
   </button>
 
+  <!-- Back to Dashboard / Accounts -->
+  <div class="mt-4 text-center">
+    <a href="{% url 'core:dashboard' %}" class="text-accent underline hover:text-hoverBorder">
+      Back to Dashboard
+    </a>
+  </div>
+
   <!-- Status messages -->
-  <div id="message" class="mt-4 text-green-600"></div>
+  <div id="message" class="mt-4 text-sm"></div>
 </div>
 
-<!-- Plaid Link script -->
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script>
-  // Trigger Plaid Link when button is clicked
   document.getElementById('link-button').addEventListener('click', async () => {
     const res = await fetch('/plaid/create-link-token/');
     const data = await res.json();
@@ -28,7 +38,6 @@
       token: data.link_token,
 
       onSuccess: async (public_token, metadata) => {
-        // Exchange the public_token for an access_token
         const exchangeRes = await fetch('/plaid/exchange-token/', {
           method: 'POST',
           headers: {
@@ -41,21 +50,27 @@
 
         if (result.status === 'success') {
           document.getElementById('message').textContent = 'Account linked successfully!';
-          window.location.href = "{% url 'core:dashboard' %}";
+          document.getElementById('message').className = 'mt-4 text-green-400 text-sm';
+          setTimeout(() => {
+            window.location.href = "{% url 'core:dashboard' %}";
+          }, 1000);
         } else {
           document.getElementById('message').textContent = 'Error linking account: ' + result.error;
+          document.getElementById('message').className = 'mt-4 text-red-400 text-sm';
         }
       },
       
-      onExit: (err, metadata) => {
-        if (err) console.error('Plaid Link error:', err);
+      onExit: (err) => {
+        if (err) {
+          document.getElementById('message').textContent = 'Plaid Link was closed or failed to open.';
+          document.getElementById('message').className = 'mt-4 text-red-400 text-sm';
+        }
       },
     });
 
     handler.open();
   });
 
-  // CSRF cookie getter (Django-safe)
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

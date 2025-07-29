@@ -20,8 +20,5 @@ urlpatterns = [
     path('verify/<int:uid>/<str:token>/', views.verify_email, name='verify_email'),
 
     # Login view
-    path('login/', auth_views.LoginView.as_view(
-        template_name='registration/login.html',
-        authentication_form=CustomLoginForm
-    ), name='login'),
+    path('login/', views.login_view, name='login'),
 ]
