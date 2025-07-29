@@ -94,6 +94,11 @@
     {% if credit_accounts %}
       {% include "core/components/account_card.html" with subtype="credit" asset_group=credit_accounts pct=credit_pct %}
     {% endif %}
+
+    <!-- Loans -->
+    {% if loan_accounts %}
+      {% include "core/components/account_card.html" with subtype="loan" asset_group=loan_accounts pct=loan_pct %}
+    {% endif %}
   </div>
 </div>
 {% else %}
