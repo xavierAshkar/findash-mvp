@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 
 # Application definition
 
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,9 +137,16 @@ TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates')]
 # Redirect logged-in users to dashboard instead of /accounts/profile/
 LOGIN_REDIRECT_URL = 'core:dashboard'
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 
+# Where Django will collect static files for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Additional static file directories (your local app's static folder)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'core', 'static'),
+    BASE_DIR / 'core' / 'static',
 ]
-# 
+
+# Whitenoise settings for serving static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
