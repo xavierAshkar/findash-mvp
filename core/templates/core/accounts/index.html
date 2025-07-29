@@ -58,7 +58,7 @@
     <!-- Other Assets Toggle -->
     {% if other_assets %}
       <div x-show="showOther" x-transition>
-        {% include "core/components/account_card.html" with subtype="other" asset_group=other_assets pct=None %}
+        {% include "core/components/account_card.html" with subtype="other" asset_group=other_assets pct=other_pct %}
       </div>
       <button
         @click="showOther = !showOther"

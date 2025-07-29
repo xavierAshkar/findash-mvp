@@ -64,6 +64,7 @@ def accounts_view(request):
     investment_pct = pct_change(deltas, types=["investment"])
     credit_pct = pct_change(deltas, types=["credit"])
     loan_pct = pct_change(deltas, types=["loan"])
+    other_pct = pct_change(deltas, types=["depository"], subtypes=[a.subtype for a in other_assets])
 
 
     return render(request, "core/accounts/index.html", {
@@ -91,4 +92,5 @@ def accounts_view(request):
         "investment_pct": investment_pct,
         "credit_pct": credit_pct,
         "loan_pct": loan_pct,
+        "other_pct": other_pct,
     })
