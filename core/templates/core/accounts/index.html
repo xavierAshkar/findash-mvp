@@ -58,7 +58,7 @@
     <!-- Other Assets Toggle -->
     {% if other_assets %}
       <div x-show="showOther" x-transition>
-        {% include "core/components/account_card.html" with subtype="other" asset_group=other_assets pct=None %}
+        {% include "core/components/account_card.html" with subtype="other" asset_group=other_assets pct=other_pct %}
       </div>
       <button
         @click="showOther = !showOther"
@@ -93,6 +93,11 @@
     <!-- Credit Cards -->
     {% if credit_accounts %}
       {% include "core/components/account_card.html" with subtype="credit" asset_group=credit_accounts pct=credit_pct %}
+    {% endif %}
+
+    <!-- Loans -->
+    {% if loan_accounts %}
+      {% include "core/components/account_card.html" with subtype="loan" asset_group=loan_accounts pct=loan_pct %}
     {% endif %}
   </div>
 </div>

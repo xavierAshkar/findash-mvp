@@ -37,7 +37,7 @@
     style="mask-image: linear-gradient(to bottom, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent);"
   >
     <ul class="space-y-1 pl-1">
-      {% for acc in net_worth_data.credit_accounts %}
+      {% for acc in net_worth_data.liability_accounts %}
         <li class="flex justify-between">
           <span class="txn-fade flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
             {{ acc.name }}

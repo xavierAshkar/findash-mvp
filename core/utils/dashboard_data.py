@@ -15,13 +15,15 @@ def get_net_worth_data(user):
 
     # Liabilities: credit cards, loans, etc.
     credit_accounts = [a for a in accounts if a.type == "credit"]
+    loan_accounts = [a for a in accounts if a.type == "loan" or a.subtype == "loan"]
+    liability_accounts = credit_accounts + loan_accounts
 
     total_assets = sum(Decimal(a.current_balance or 0) for a in asset_accounts)
-    total_liabilities = sum(Decimal(a.current_balance or 0) for a in credit_accounts)
+    total_liabilities = sum(Decimal(a.current_balance or 0) for a in liability_accounts)
 
     return {
         "asset_accounts": asset_accounts,
-        "credit_accounts": credit_accounts,
+        "liability_accounts": liability_accounts,
         "total_assets": total_assets,
         "total_liabilities": total_liabilities,
         "net_worth": total_assets - total_liabilities

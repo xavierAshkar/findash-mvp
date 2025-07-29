@@ -30,6 +30,7 @@ def accounts_view(request):
     investment_accounts = [a for a in accounts if a.type == "investment"]
     other_assets = [a for a in accounts if a.type == "depository" and a.subtype not in common_subtypes]
     credit_accounts = [a for a in accounts if a.type == "credit"]
+    loan_accounts = [a for a in accounts if a.type == "loan" or a.subtype == "loan"]
 
     # --- Totals ---
     total_checking = sum(Decimal(a.current_balance) for a in checking_accounts)
@@ -39,13 +40,14 @@ def accounts_view(request):
 
     total_assets = total_checking + total_savings + total_investments + total_other
     total_credit = sum(Decimal(a.current_balance) for a in credit_accounts)
-    total_liabilities = total_credit  # liabilities = credit balances
-    net_worth = total_assets + total_liabilities
+    total_loans = sum(Decimal(a.current_balance) for a in loan_accounts)
+    total_liabilities = total_credit + total_loans
+    net_worth = total_assets - total_liabilities
 
     # --- Percentage change calculations (assets/liabilities) ---
     # Separate deltas
     asset_deltas = [d for d in deltas if d["account"].type in ["depository", "investment"]]
-    liability_deltas = [d for d in deltas if d["account"].type == "credit"]
+    liability_deltas = [d for d in deltas if d["account"].type in ["credit", "loan"]]
 
     # Compute previous totals (snapshot balances) = current - delta
     prev_assets = sum((d["current"] - (d["delta"] or 0)) for d in asset_deltas)
@@ -61,6 +63,8 @@ def accounts_view(request):
     savings_pct = pct_change(deltas, types=["depository"], subtypes=["savings"])
     investment_pct = pct_change(deltas, types=["investment"])
     credit_pct = pct_change(deltas, types=["credit"])
+    loan_pct = pct_change(deltas, types=["loan"])
+    other_pct = pct_change(deltas, types=["depository"], subtypes=[a.subtype for a in other_assets])
 
 
     return render(request, "core/accounts/index.html", {
@@ -69,12 +73,14 @@ def accounts_view(request):
         "investment_accounts": investment_accounts,
         "other_assets": other_assets,
         "credit_accounts": credit_accounts,
+        "loan_accounts": loan_accounts,
         "total_checking": total_checking,
         "total_savings": total_savings,
         "total_investments": total_investments,
         "total_other": total_other,
         "total_assets": total_assets,
         "total_credit": total_credit,
+        "total_loans": total_loans,
         "total_liabilities": total_liabilities,
         "net_worth": net_worth,
         "accounts": accounts,
@@ -85,4 +91,6 @@ def accounts_view(request):
         "savings_pct": savings_pct,
         "investment_pct": investment_pct,
         "credit_pct": credit_pct,
+        "loan_pct": loan_pct,
+        "other_pct": other_pct,
     })
